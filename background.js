@@ -58,6 +58,9 @@ function onMessage( message , sender , sendResponse ) {
 	if ( message.getItems ) {
 		sendResponse( channels[message.getItems].items );
 	}
+	if ( message.getChannels ) {
+		sendResponse( channels );
+	}
 }
 browser.runtime.onMessage.addListener( onMessage )
 

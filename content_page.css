@@ -21,7 +21,9 @@ body{
 	margin-left: var(--leftPanelWidth);
 }
 
-
+#settings{
+	margin: 10px;
+}
 
 #channels{
 	background-color: #111111;

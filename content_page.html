@@ -14,19 +14,18 @@
 		<div id="dragBar" class="panel"></div>
 		<div id="items" class="panel">
 			<div id="settings"> <!-- Maybe this should be a template so that I can reopen it with JS after it gets removed. -->
-				<h3>Add new feed.</h2>
+				<h3>Add new feed.</h3>
 				<div>
 					<span>Feed URL:</span>
 					<input type="text" spellcheck="false" id="loadNewChannelTextInput">
 					<button id="loadNewChannelButton">Load</button>
 				</div>
-				<div>
-					<span id="addChannelPopupStatus"></span>
-				</div>
-				<h3>Import or export feeds as .opml file.</h2>
+				<div id="addChannelPopupStatus"></div>
+				<h3>Import or export feeds as .opml file.</h3>
 				<button id="importFileButton">Import</button>
+				<button id="exportFileButton">Export</button>
 				<input type="file" accept=".opml" id="importFile" name="importFile" style="display: none;">
-				<a href="" download="feeds.opml" id="exportFile" class="button"><button>Export</button></a>
+				<a href="" download="feeds.opml" id="exportFile" style="display:none;"></a>
 			</div>
 		</div>
 	</body>

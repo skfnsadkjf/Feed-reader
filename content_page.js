@@ -10,7 +10,7 @@ function getDate( pubDate ) {
 	let i = times.findIndex( v => x < v );
 	let num = Math.floor( x / times[i-1] );
 	let word = periods[i] + ( num >= 2 ? "s" : "" );
-	return date.toLocaleString( "en-US" , dateOptions ) + " (" + num + " " + word + ")";
+	return date.toLocaleString( "en-US" , dateOptions ) + " (" + num + " " + word + " ago)";
 }
 const dragFunc = e => document.documentElement.style.setProperty( "--leftPanelWidth", e.clientX + "px" );
 function dragBar( e ) {
@@ -107,18 +107,54 @@ function loadNewChannel( e ) {
 		browser.runtime.sendMessage( { "url" : url.href , "channel" : data.channel , "newItems" : data.newItems } );
 	} , error => loadChannelStatus( "Failed to load URL." ) );
 }
-function makeExport() {
 
+const opmlTemplate = `<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+<head>
+<title>Feed Subscriptions</title>
+</head>
+<body>
+</body>
+</opml>`
+
+function opmlImport() {
+	 document.getElementById( "importFile" ).click();
 }
+
+function opmlExport() {
+	browser.runtime.sendMessage( { "getChannels" : true } ).then( channels => {
+		let parser = new DOMParser();
+		let xmlDoc = parser.parseFromString( opmlTemplate , "text/xml" );
+		let body = xmlDoc.querySelector( "body" );
+		for ( let channel in channels ) {
+			let outline = xmlDoc.createElement( "outline" );
+			outline.setAttribute( "text" , channel );
+			outline.setAttribute( "title" , channel );
+			outline.setAttribute( "type" , "rss" );
+			outline.setAttribute( "xmlUrl" , channels[channel].link );
+			body.appendChild( outline );
+			body.appendChild( xmlDoc.createTextNode( "\n" ) );
+		}
+		let serializer = new XMLSerializer();
+		let xmlString = serializer.serializeToString( xmlDoc );
+		console.log( xmlString );
+		let blob = new Blob( [xmlString] , { "type" : "text/xml" } );
+		let a = document.getElementById( "exportFileA" );
+		a.href = URL.createObjectURL( blob );
+		a.click();
+		URL.revokeObjectURL( a.href );
+	} );
+}
+
 
 
 document.getElementById( "dragBar" ).addEventListener( "mousedown" , dragBar );
 document.getElementById( "loadNewChannelButton" ).addEventListener( "click" , loadNewChannel );
-document.getElementById( "importFileButton" ).onclick = e => document.getElementById( "importFile" ).click(); // this is needed to use button styling for <input type="file"> tags.
+document.getElementById( "importFileButton" ).addEventListener( "click" , opmlImport );
+document.getElementById( "exportFileButton" ).addEventListener( "click" , opmlExport );
 browser.storage.onChanged.addListener( onStorageChanged );
 window.onunload = e => browser.storage.onChanged.removeListener( onStorageChanged );
-browser.storage.local.get( null ).then( v => makeChannels( v.channels ) );
-
+browser.runtime.sendMessage( { "getChannels" : true } ).then( v => makeChannels( v ) );
 
 
 

@@ -55,13 +55,25 @@ function onMessage( message , sender , sendResponse ) {
 	if ( message.newItems ) {
 		addNewItems( message.url , message.channel , message.newItems );
 	}
-	if ( message.getData ) {
-		sendResponse( data );
+	if ( message.getItems ) {
+		sendResponse( channels[message.getItems].items );
 	}
 }
 browser.runtime.onMessage.addListener( onMessage )
 
-
+function browserActionOnClicked() {
+	let url = browser.runtime.getURL( "content_page.html" );
+	browser.tabs.query( { "url" : url } ).then( tabs => {
+		if ( tabs.length == 0 ) {
+			browser.tabs.create( { "url" : browser.runtime.getURL( "content_page.html" ) } );
+		}
+		else {
+			browser.tabs.update( tabs[0].id , { "active" : true } );
+			browser.windows.update( tabs[0].windowId , { "focused" : true } );
+		}
+		console.log( tabs[0] );
+	} );
+}
 let channels;
 let data;
 browser.storage.local.get( null ).then( v => {
@@ -73,9 +85,7 @@ browser.storage.local.get( null ).then( v => {
 	}
 	channels = data.channels;
 	browser.storage.onChanged.addListener( onStorageChanged );
-	browser.browserAction.onClicked.addListener( () => {
-		browser.tabs.create( { "url" : browser.runtime.getURL( "content_page.html" ) } );
-	} );
+	browser.browserAction.onClicked.addListener( browserActionOnClicked );
 	let url = "https://www.royalroad.com/fiction/syndication/16946";
 	// get( url );
 	let a = parseXML( responseText );

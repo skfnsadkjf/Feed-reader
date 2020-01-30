@@ -58,10 +58,9 @@ function makeChannels( channels ) {
 	}
 }
 function makeItems( channel ) {
-	browser.storage.local.get( "channels" ).then( data => {
-		let channels = data.channels;
+	browser.runtime.sendMessage( { "getItems" : channel } ).then( items => {
 		removeChildren( "items" );
-		channels[channel].items.forEach( item => {
+		items.forEach( item => {
 			let t = document.importNode( document.getElementById( "itemTemplate" ) , true );
 			t.content.querySelector( "a" ).textContent = item.title;
 			t.content.querySelector( "a" ).href = item.link;
@@ -74,7 +73,6 @@ function makeItems( channel ) {
 			} );
 			document.querySelector( "#items" ).appendChild( t.content );
 		} );
-
 	} );
 }
 

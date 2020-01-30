@@ -19,13 +19,6 @@ function dragBar( e ) {
 	e.preventDefault();
 	e.stopPropagation();
 }
-const addChannelPopupElem = document.getElementById( "addChannelPopup" );
-function toggleaddChannelPopupElem( e ) {
-	loadChannelStatus( "" );
-	// document.getElementById( "loadNewChannelTextInput" ).value = ""; // only commented for testing purposes.
-	let hidden = addChannelPopupElem.style.display == "none"
-	addChannelPopupElem.style.display = hidden ? "initial" : "none";
-}
 function getItem( elem ){
 	return elem.parentElement.id == "items" ? elem : getItem( elem.parentElement );
 }
@@ -109,15 +102,13 @@ function loadNewChannel( e ) {
 	browser.runtime.sendMessage( { "get" : url.href } ).then( loadChannelStatus );
 }
 
-browser.storage.local.get( null ).then( v => {
-	makeChannels( v.channels );
-	browser.storage.onChanged.addListener( onStorageChanged );
-	window.onunload = e => browser.storage.onChanged.removeListener( onStorageChanged );
-	document.getElementById( "dragBar" ).addEventListener( "mousedown" , dragBar );
-	document.getElementById( "addChannelIcon" ).addEventListener( "click" , toggleaddChannelPopupElem );
-	document.getElementById( "addChannelClose" ).addEventListener( "click" , toggleaddChannelPopupElem );
-	document.getElementById( "loadNewChannelButton" ).addEventListener( "click" , loadNewChannel );
-} );
+
+document.getElementById( "dragBar" ).addEventListener( "mousedown" , dragBar );
+document.getElementById( "loadNewChannelButton" ).addEventListener( "click" , loadNewChannel );
+document.getElementById( "importFileButton" ).onclick = e => document.getElementById( "importFile" ).click(); // this is needed to use button styling for <input type="file"> tags.
+browser.storage.onChanged.addListener( onStorageChanged );
+window.onunload = e => browser.storage.onChanged.removeListener( onStorageChanged );
+browser.storage.local.get( null ).then( v => makeChannels( v.channels ) );
 
 
 

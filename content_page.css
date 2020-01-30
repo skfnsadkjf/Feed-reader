@@ -23,18 +23,6 @@ body{
 
 
 
-#toolbar{
-	background-color: #111111;
-	height: 30px;
-	border-bottom: 2px solid #555555;
-}
-#toolbar>img{
-	width: 24px;
-	margin: 3px;
-}
-
-
-
 #channels{
 	background-color: #111111;
 	width: calc( var(--leftPanelWidth) - 20px );
@@ -105,25 +93,3 @@ body{
 
 
 
-#addChannelPopup{
-	position: absolute;
-	left: 0px;
-	right: 0px;
-	top: 200px;
-	margin: auto;
-	z-index: 1;
-	width: 400px;
-	background-color: #111111;
-	border: 2px solid #555555;
-	padding: 10px;
-}
-#addChannelPopup>div{
-	height: 25px;
-}
-#addChannelPopup input{
-	width: 250px;
-}
-#addChannelPopup button{
-	width: 60px;
-	float: right;
-}

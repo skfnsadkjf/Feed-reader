@@ -1,4 +1,4 @@
-# Firefox addon RSS viewer.
+# Firefox feed reader webextension.
 
 TODO
 * channel sections should have a total number of unread in section.

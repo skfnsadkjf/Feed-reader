@@ -47,7 +47,7 @@ function makeChannels( channels ) {
 	for ( let channel in channels ) {
 		let t = document.importNode( document.getElementById( "channelTemplate" ) , true );
 		t.content.querySelector( ".title" ).textContent = channel;
-		let url = new URL(channels[channel].items[0].link);
+		let url = new URL(channels[channel].link);
 		let icon = "https://icons.duckduckgo.com/ip3/" + url.hostname + ".ico"
 		t.content.querySelector( "img" ).src = icon;
 		let unreadCount = channels[channel].items.filter( v => v.unread ).length;
@@ -118,8 +118,31 @@ const opmlTemplate = `<?xml version="1.0" encoding="UTF-8"?>
 </body>
 </opml>`
 
-function opmlImport() {
-	 document.getElementById( "importFile" ).click();
+
+const hostsTags = { "www.royalroad.com" : "royalroad" , "www.youtube.com" : "youtube" };
+function opmlImport( e ) {
+	let file = e.target.files[0];
+	file.text().then( async text => {
+		let parser = new DOMParser();
+		let xmlDoc = parser.parseFromString( text , "text/xml" );
+		let outlines = xmlDoc.querySelectorAll( "outline[xmlUrl]" );
+
+
+		let channels = Array.from( outlines , v => {
+			let href = v.getAttribute( "xmlUrl" );
+			let host = hostsTags[new URL( href ).hostname];
+			let title = v.getAttribute( "title" );
+			return { "items" : [] , "unread" : 0 , "link" : href , "tags" : [host] , "section" : host , "title" : title };
+		} );
+		browser.runtime.sendMessage( { "newChannels" : channels } );
+		// for ( let i = 0; i < outlines.length; i++ ) {
+		// 	let href = outlines[i].getAttribute( "xmlUrl" );
+		// 	get( href ).then( data  => {
+		// 		browser.runtime.sendMessage( { "url" : href , "channel" : data.channel , "newItems" : data.newItems } );
+		// 	} );
+		// 	await new Promise( r => setTimeout( r , 1000 ) );
+		// }
+	} );
 }
 
 function opmlExport() {
@@ -140,7 +163,7 @@ function opmlExport() {
 		let xmlString = serializer.serializeToString( xmlDoc );
 		console.log( xmlString );
 		let blob = new Blob( [xmlString] , { "type" : "text/xml" } );
-		let a = document.getElementById( "exportFileA" );
+		let a = document.getElementById( "exportFile" );
 		a.href = URL.createObjectURL( blob );
 		a.click();
 		URL.revokeObjectURL( a.href );
@@ -149,7 +172,8 @@ function opmlExport() {
 
 document.getElementById( "dragBar" ).addEventListener( "mousedown" , dragBar );
 document.getElementById( "loadNewChannel" ).addEventListener( "submit" , loadNewChannel );
-document.getElementById( "importFileButton" ).addEventListener( "click" , opmlImport );
+document.getElementById( "importFile" ).addEventListener( "change" , opmlImport );
+document.getElementById( "importFileButton" ).onclick = e => document.getElementById( "importFile" ).click();
 document.getElementById( "exportFileButton" ).addEventListener( "click" , opmlExport );
 browser.storage.onChanged.addListener( onStorageChanged );
 window.onunload = e => browser.storage.onChanged.removeListener( onStorageChanged );

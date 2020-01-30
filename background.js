@@ -55,6 +55,10 @@ function onMessage( message , sender , sendResponse ) {
 	if ( message.newItems ) {
 		addNewItems( message.url , message.channel , message.newItems );
 	}
+	if ( message.newChannels ) {
+		message.newChannels.filter( v => !channels[v.title] ).forEach( v => channels[v.title] = v );
+		browser.storage.local.set( { "channels" : channels } );
+	}
 	if ( message.getItems ) {
 		sendResponse( channels[message.getItems].items );
 	}
@@ -74,7 +78,6 @@ function browserActionOnClicked() {
 			browser.tabs.update( tabs[0].id , { "active" : true } );
 			browser.windows.update( tabs[0].windowId , { "focused" : true } );
 		}
-		console.log( tabs[0] );
 	} );
 }
 let channels;

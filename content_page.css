@@ -28,7 +28,7 @@ body{
 #channels{
 	background-color: #111111;
 	width: calc( var(--leftPanelWidth) - 20px );
-	padding: 10px 10px 0px 10px;
+	padding: 0px 10px 0px 10px;
 }
 .channel{
 	cursor: pointer;

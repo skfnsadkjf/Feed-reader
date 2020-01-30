@@ -2,8 +2,12 @@
 	"manifest_version": 2,
 	"name": "grim's feed reader",
 	"version": "1.0",
-
 	"description": "RSS reader",
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "feed-reader@grim.grim"
+		}
+	},
 	"permissions": [
 		"<all_urls>",
 		"tabs",
@@ -14,8 +18,6 @@
 		"default_title": "grim"
 	},
 	"background": {
-		"scripts": [
-			"background.js"
-		]
+		"page" : "background.html"
 	}
 }

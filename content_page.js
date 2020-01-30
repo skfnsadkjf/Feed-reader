@@ -1,3 +1,5 @@
+import { get } from "/get_feed.js";
+
 const dateOptions = { "weekday" : "short" , "year" : "numeric" , "month" : "short" , "day" : "2-digit" ,
 	"hour" : "2-digit" , "minute" : "2-digit" , "second" : "2-digit" , "hour12" : false };
 const times = [0 , 1000 , 60000 , 3600000 , 86400000 , 604800000 , 2419200000 , 31536000000 , Infinity];
@@ -97,9 +99,18 @@ function loadNewChannel( e ) {
 	try {
 		url = new URL( document.getElementById( "loadNewChannelTextInput" ).value );
 	} catch ( e ) {
-		return loadChannelStatus( "Field requires a URL" );
+		return loadChannelStatus( "Field requires a valid URL" );
 	}
-	browser.runtime.sendMessage( { "get" : url.href } ).then( loadChannelStatus );
+	get( url.href ).then( data => {
+		if ( data === false ) {
+			return loadChannelStatus( "URL isn't an RSS or Atom page." );
+		}
+		loadChannelStatus( "Success!" );
+		browser.runtime.sendMessage( { "url" : url.href , "channel" : data.channel , "newItems" : data.newItems } );
+	} , error => loadChannelStatus( "Failed to load URL." ) );
+}
+function makeExport() {
+
 }
 
 

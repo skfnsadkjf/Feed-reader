@@ -93,10 +93,11 @@ function loadChannelStatus( errorText ) {
 	addChannelPopupStatusElem.textContent = errorText;
 }
 function loadNewChannel( e ) {
+	e.preventDefault();
 	let url;
 	try {
 		url = new URL( document.getElementById( "loadNewChannelTextInput" ).value );
-	} catch ( e ) {
+	} catch ( err ) {
 		return loadChannelStatus( "Field requires a valid URL" );
 	}
 	get( url.href ).then( data => {
@@ -146,10 +147,8 @@ function opmlExport() {
 	} );
 }
 
-
-
 document.getElementById( "dragBar" ).addEventListener( "mousedown" , dragBar );
-document.getElementById( "loadNewChannelButton" ).addEventListener( "click" , loadNewChannel );
+document.getElementById( "loadNewChannel" ).addEventListener( "submit" , loadNewChannel );
 document.getElementById( "importFileButton" ).addEventListener( "click" , opmlImport );
 document.getElementById( "exportFileButton" ).addEventListener( "click" , opmlExport );
 browser.storage.onChanged.addListener( onStorageChanged );

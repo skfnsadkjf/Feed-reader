@@ -17,8 +17,10 @@
 				<h3>Add new feed.</h3>
 				<div>
 					<span>Feed URL:</span>
-					<input type="text" spellcheck="false" id="loadNewChannelTextInput">
-					<button id="loadNewChannelButton">Load</button>
+					<form id="loadNewChannel">
+						<input type="text" spellcheck="false" id="loadNewChannelTextInput">
+						<input type="submit" value="Load">
+					</form>
 				</div>
 				<div id="addChannelPopupStatus"></div>
 				<h3>Import or export feeds as .opml file.</h3>

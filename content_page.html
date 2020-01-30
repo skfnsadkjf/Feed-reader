@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>grim's RSS addon</title>
+		<link rel="stylesheet" href="content_page.css"/>
+		<script type="module" src=content_page.js></script>
+		<template id="channelTemplate"><div class="channel"><img><span class="unread"></span><span class="title"></span></div></template>
+		<template id="itemTemplate"><div class="item"><div><a target="_blank" class="itemUnread"></a><span class="itemMarkRead">Read</span></div><div><span class="itemChannel"></span><span class="itemDate"></span></div></div></template>
+		<template id="channelSectionTemplate"><div class="channelSection"><div></div><div></div></div></template>
+	</head>
+	<body>
+		<div id="toolbar">
+			<img id="addChannelIcon" src="icons/add.png" title="Add new feed.">
+			<img id="importExportIcon" src="icons/import-export.png" title="Import or export all feeds to file.">
+		</div>
+		<div id="channels" class="panel"></div>
+		<div id="dragBar" class="panel"></div>
+		<div id="items" class="panel"></div>
+		<div id="addChannelPopup" style="display:initial;">
+			<div>
+				<span>Feed URL:</span>
+				<input type="text" spellcheck="false" id="loadNewChannelTextInput">
+				<button id="loadNewChannelButton">Load</button>
+			</div>
+			<div>
+				<span id="addChannelPopupStatus"></span>
+				<button id="addChannelClose">close</button>
+			</div>
+		</div>
+	</body>
+</html>

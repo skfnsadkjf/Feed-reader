@@ -1,0 +1,21 @@
+{
+	"manifest_version": 2,
+	"name": "grim",
+	"version": "1.0",
+
+	"description": "RSS reader",
+	"permissions": [
+		"<all_urls>",
+		"tabs",
+		"storage"
+	],
+	"browser_action": {
+		"default_icon": "icons/browser-action.png",
+		"default_title": "grim"
+	},
+	"background": {
+		"scripts": [
+			"background.js"
+		]
+	}
+}

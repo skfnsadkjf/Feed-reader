@@ -1,0 +1,129 @@
+:root{
+	--leftPanelWidth: 200px;
+	--dragBarWidth: 3px;
+}
+body{
+	margin: 0px;
+	padding: 0px;
+	font-family: "Segoe UI", Oxygen, Roboto, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	color: white;
+}
+.panel{
+	position: fixed;
+	overflow-y: auto;
+	height: 100%;
+}
+#dragBar{
+	background-color: #555555;
+	cursor: w-resize;
+	width: var(--dragBarWidth);
+	margin-left: var(--leftPanelWidth);
+}
+
+
+
+#toolbar{
+	background-color: #111111;
+	height: 30px;
+	border-bottom: 2px solid #555555;
+}
+#toolbar>img{
+	width: 24px;
+	margin: 3px;
+}
+
+
+
+#channels{
+	background-color: #111111;
+	width: calc( var(--leftPanelWidth) - 20px );
+	padding: 10px 10px 0px 10px;
+}
+.channel{
+	cursor: pointer;
+	overflow-x: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.channel .unread{
+	float: right;
+}
+.channel>img{
+	height: 16px;
+	margin-right: 5px;
+	vertical-align: middle;
+}
+
+
+
+#items{
+	background-color: #000000;
+	width: calc( 100% - var(--leftPanelWidth) - var(--dragBarWidth) );
+	margin-left: calc( var(--leftPanelWidth) + var(--dragBarWidth ) );
+}
+.item{
+	background-color: #222222;
+	margin: 2px 10px 0px 10px;
+	padding: 3px 5px 2px 5px;
+	height: 29px;
+	--buttonWidth: 50px;
+}
+.item>div:first-child{
+	font-size: 15px;
+	line-height: 14px;
+}
+.item>div:last-child{
+	font-size: 11px;
+	top: 15px;
+}
+.item a{
+	max-width: calc( 100% - var(--buttonWidth) );
+	overflow-x: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	font-weight: bold;
+}
+.item a.read{
+	color: #FFFFFF;
+}
+.item a.unread{
+	color: #00AAAA;
+}
+.item>div{
+	position: relative;
+}
+.item>div>*{
+	position: absolute;
+}
+.itemMarkRead,.itemDate{
+	right: 0px;
+}
+.itemDate{
+	font-family: sans-serif;
+}
+
+
+
+#addChannelPopup{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 200px;
+	margin: auto;
+	z-index: 1;
+	width: 400px;
+	background-color: #111111;
+	border: 2px solid #555555;
+	padding: 10px;
+}
+#addChannelPopup>div{
+	height: 25px;
+}
+#addChannelPopup input{
+	width: 250px;
+}
+#addChannelPopup button{
+	width: 60px;
+	float: right;
+}

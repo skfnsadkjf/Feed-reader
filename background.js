@@ -30,8 +30,7 @@ function onStorageChanged( changes , areaName ) {
 	setBadge();
 }
 const hostsTags = { "www.royalroad.com" : "royalroad" , "www.youtube.com" : "youtube" };
-function addNewItems( url , channel , items ) {
-	addChannelIfNew( url , channel );
+function addNewItems( channel , items ) {
 	let newItems = items.filter( item => channels[channel].items.every( v => v.title != item.title ) );
 	if ( newItems.length > 0 ) {
 		channels[channel].items.push( ...newItems );
@@ -61,7 +60,8 @@ function onMessage( message , sender , sendResponse ) {
 		browser.storage.local.set( { "channels" : channels } );
 	}
 	if ( message.newItems ) {
-		addNewItems( message.url , message.channel , message.newItems );
+		addChannelIfNew( message.url , message.channel );
+		addNewItems( message.channel , message.newItems );
 	}
 	if ( message.opmlImport ) {
 		message.opmlImport.forEach( v => addChannelIfNew( v.href , v.channel ) );
@@ -78,40 +78,28 @@ function onMessage( message , sender , sendResponse ) {
 		sendResponse( channels );
 	}
 }
-browser.runtime.onMessage.addListener( onMessage )
-
 function browserActionOnClicked() {
 	let url = browser.runtime.getURL( "content_page.html" );
 	browser.tabs.query( { "url" : url } ).then( tabs => {
 		if ( tabs.length == 0 ) {
-			browser.tabs.create( { "url" : browser.runtime.getURL( "content_page.html" ) } );
+			browser.tabs.create( { "url" : "/content_page.html" } );
 		}
 		else {
 			browser.tabs.update( tabs[0].id , { "active" : true } );
+			browser.tabs.reload( tabs[0].id );
 			browser.windows.update( tabs[0].windowId , { "focused" : true } );
 		}
 	} );
 }
+
 let channels;
 let data;
+browser.runtime.onMessage.addListener( onMessage );
+browser.storage.onChanged.addListener( onStorageChanged );
+browser.browserAction.onClicked.addListener( browserActionOnClicked );
 browser.storage.local.get( null ).then( v => {
-	if ( v.channels == undefined ) {
-		data = { "channels" : {} , "sections" : [] , "options" : [] };
-	}
-	else {
-		data = v;
-	}
+	data = v.channels != undefined ? v : { "channels" : {} , "sections" : [] , "options" : [] };
 	channels = data.channels;
-	browser.storage.onChanged.addListener( onStorageChanged );
-	browser.browserAction.onClicked.addListener( browserActionOnClicked );
-	let url = "https://www.royalroad.com/fiction/syndication/16946";
-	// get( url );
-	let a = parseXML( responseText );
-	addNewItems( "https://www.royalroad.com/fiction/syndication/16946" , a.channel , a.newItems );
-	let b = parseXML( responseText3 );
-	addNewItems( "https://www.royalroad.com/fiction/syndication/16946" , b.channel , b.newItems );
-	let c = parseXML( responseText2 );
-	addNewItems( "https://www.youtube.com/feeds/videos.xml?channel_id=UCis5B3Zru-vymPRcbpM1NEA" , c.channel , c.newItems );
 	setBadge();
 } );
 

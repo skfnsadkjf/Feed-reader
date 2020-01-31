@@ -170,11 +170,14 @@ function jsonExport() {
 		URL.revokeObjectURL( a.href );
 	} );
 }
-
+const updateAllFeeds = e => browser.runtime.sendMessage( { "updateAll" : true } );
+const jsonImportButton = e => document.getElementById( "jsonImportFile" ).click();
+const opmlImportButton = e => document.getElementById( "opmlImportFile" ).click();
 document.getElementById( "dragBar" ).addEventListener( "mousedown" , dragBar );
 document.getElementById( "loadNewChannel" ).addEventListener( "submit" , loadNewChannel );
-document.getElementById( "jsonImportFileButton" ).onclick = e => document.getElementById( "jsonImportFile" ).click();
-document.getElementById( "opmlImportFileButton" ).onclick = e => document.getElementById( "opmlImportFile" ).click();
+document.getElementById( "updateAll" ).addEventListener( "click" , updateAllFeeds );
+document.getElementById( "jsonImportFileButton" ).addEventListener( "click" , jsonImportButton );
+document.getElementById( "opmlImportFileButton" ).addEventListener( "click" , opmlImportButton );
 document.getElementById( "jsonImportFile" ).addEventListener( "change" , jsonImport );
 document.getElementById( "opmlImportFile" ).addEventListener( "change" , opmlImport );
 document.getElementById( "jsonExportFileButton" ).addEventListener( "click" , jsonExport );

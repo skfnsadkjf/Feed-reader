@@ -57,6 +57,7 @@ function addChannelIfNew( href , channel ) {
 	}
 }
 function updateFeed( channel ) {
+	console.log( "updating feed: " + channel.title );
 	channel.updated = Date.now();
 	get( channel.link ).then( data => {
 		addNewItems( data.channel , data.newItems );

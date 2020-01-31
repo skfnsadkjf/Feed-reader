@@ -11,7 +11,6 @@ Current Features:
 
 TODO
 
-* update all feeds button.
 * channels context menu containing:
   * update feed.
   * delete feed.

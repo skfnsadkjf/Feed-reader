@@ -1,13 +1,32 @@
 # Firefox feed reader webextension.
 
+Current Features:
+
+* can add feeds via a text box.
+* can import or export feeds from/to a json or opml file.
+* browser action badge contains total unread items.
+  * can filter this to only be total unread items from channels with x tag. Currently hardcoded.
+* each item shows it's title, feed title, pubdate and time since pubdate.
+* items have a "read" button to declare they've been read.
+
 TODO
 
-* update feeds regularly.
-* channel sections should have a total number of unread in section.
+* update all new feeds when importing from both json and opml.
+* update all feeds button.
+* channels context menu containing:
+  * update feed.
+  * delete feed.
+  * mark all as read.
 * content script that detects if a page has a feed.
 * add manga
   * Not sure how manga would fit into the page without mad scrolling becoming a thing.
   * maybe make each section expandable
+  * maybe make a manga channel that has a custom items window.
+
+Maybe do:
+
+* add options page.
+* channel sections should have a total number of unread in section.
 
 bugs:
 

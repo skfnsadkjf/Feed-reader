@@ -1,6 +1,10 @@
 import { responseText , responseText2 , responseText3 } from "/example_feeds.js";
 import { parseXML , get } from "/get_feed.js";
 
+const timeBetweenUpdates = 86400000; // 86400000; 1 day.
+const minimumTimeBetweenUpdates = 2000;
+const hostsTags = { "www.royalroad.com" : "royalroad" , "www.youtube.com" : "youtube" };
+
 function setUnread( channel ) {
 	channels[channel].unread = channels[channel].items.filter( v => v.unread ).length;
 }
@@ -29,7 +33,6 @@ function onStorageChanged( changes , areaName ) {
 	channels = data.channels;
 	setBadge();
 }
-const hostsTags = { "www.royalroad.com" : "royalroad" , "www.youtube.com" : "youtube" };
 function addNewItems( channel , items ) {
 	let newItems = items.filter( item => channels[channel].items.every( v => v.title != item.title ) );
 	if ( newItems.length > 0 ) {
@@ -92,13 +95,12 @@ function browserActionOnClicked() {
 	} );
 }
 
-const timeBetweenUpdates = 86400000; // 86400000; 1 day.
-const minimumTimeBetweenUpdates = 5000;
+
 const getWait = lastUpdated => lastUpdated + timeBetweenUpdates - Date.now();
 function updateFeeds() {
 	let arr = Object.values( channels ).sort( ( a , b ) => a.updated > b.updated );
 	if ( arr.length == 0 ) { // if there are no feeds, do nothing and check again every minute.
-		return setTimeout( updateFeeds , 1000 );
+		return setTimeout( updateFeeds , 10000 );
 	}
 	let timeUntilUpdateFeeds = getWait( arr[0].updated ); // when positive, updateFeeds() was called too early.
 	if ( timeUntilUpdateFeeds > 0 ) {

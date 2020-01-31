@@ -117,9 +117,6 @@ const opmlTemplate = `<?xml version="1.0" encoding="UTF-8"?>
 <body>
 </body>
 </opml>`
-
-
-const hostsTags = { "www.royalroad.com" : "royalroad" , "www.youtube.com" : "youtube" };
 function opmlImport( e ) {
 	let file = e.target.files[0];
 	file.text().then( async text => {
@@ -129,17 +126,16 @@ function opmlImport( e ) {
 		let channels = Array.from( outlines , v => {
 			return { "href" : v.getAttribute( "xmlUrl" ) , "channel" : v.getAttribute( "title" ) };
 		} );
-		browser.runtime.sendMessage( { "newChannels" : channels } );
-		// for ( let i = 0; i < outlines.length; i++ ) {
-		// 	let href = outlines[i].getAttribute( "xmlUrl" );
-		// 	get( href ).then( data  => {
-		// 		browser.runtime.sendMessage( { "url" : href , "channel" : data.channel , "newItems" : data.newItems } );
-		// 	} );
-		// 	await new Promise( r => setTimeout( r , 1000 ) );
-		// }
+		browser.runtime.sendMessage( { "opmlImport" : channels } );
 	} );
 }
-
+function jsonImport( e ) {
+	let file = e.target.files[0];
+	file.text().then( json => {
+		let channels = JSON.parse( json );
+		browser.runtime.sendMessage( { "jsonImport" : channels } );
+	} );
+}
 function opmlExport() {
 	browser.runtime.sendMessage( { "getChannels" : true } ).then( channels => {
 		let parser = new DOMParser();
@@ -158,7 +154,17 @@ function opmlExport() {
 		let xmlString = serializer.serializeToString( xmlDoc );
 		console.log( xmlString );
 		let blob = new Blob( [xmlString] , { "type" : "text/xml" } );
-		let a = document.getElementById( "exportFile" );
+		let a = document.getElementById( "opmlExportFile" );
+		a.href = URL.createObjectURL( blob );
+		a.click();
+		URL.revokeObjectURL( a.href );
+	} );
+}
+function jsonExport() {
+	browser.runtime.sendMessage( { "getChannels" : true } ).then( channels => {
+		let json = JSON.stringify( channels );
+		let blob = new Blob( [json] , { "type" : "application/json" } );
+		let a = document.getElementById( "jsonExportFile" );
 		a.href = URL.createObjectURL( blob );
 		a.click();
 		URL.revokeObjectURL( a.href );
@@ -167,12 +173,14 @@ function opmlExport() {
 
 document.getElementById( "dragBar" ).addEventListener( "mousedown" , dragBar );
 document.getElementById( "loadNewChannel" ).addEventListener( "submit" , loadNewChannel );
-document.getElementById( "importFile" ).addEventListener( "change" , opmlImport );
-document.getElementById( "importFileButton" ).onclick = e => document.getElementById( "importFile" ).click();
-document.getElementById( "exportFileButton" ).addEventListener( "click" , opmlExport );
+document.getElementById( "jsonImportFileButton" ).onclick = e => document.getElementById( "jsonImportFile" ).click();
+document.getElementById( "opmlImportFileButton" ).onclick = e => document.getElementById( "opmlImportFile" ).click();
+document.getElementById( "jsonImportFile" ).addEventListener( "change" , jsonImport );
+document.getElementById( "opmlImportFile" ).addEventListener( "change" , opmlImport );
+document.getElementById( "jsonExportFileButton" ).addEventListener( "click" , jsonExport );
+document.getElementById( "opmlExportFileButton" ).addEventListener( "click" , opmlExport );
 browser.storage.onChanged.addListener( onStorageChanged );
 window.onunload = e => browser.storage.onChanged.removeListener( onStorageChanged );
 browser.runtime.sendMessage( { "getChannels" : true } ).then( v => makeChannels( v ) );
-
 
 

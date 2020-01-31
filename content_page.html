@@ -23,11 +23,20 @@
 					</form>
 				</div>
 				<div id="addChannelPopupStatus"></div>
-				<h3>Import or export feeds as .opml file.</h3>
-				<button id="importFileButton">Import</button>
-				<button id="exportFileButton">Export</button>
-				<input type="file" accept=".opml" id="importFile" name="importFile" style="display:none;">
-				<a href="" download="feeds.opml" id="exportFile" style="display:none;"></a>
+				<h3>Import feeds from file or export feeds to file.</h3>
+				<span>Json format will replace data in existing feeds:</span>
+				<br/>
+				<button id="jsonImportFileButton">Import</button>
+				<button id="jsonExportFileButton">Export</button>
+				<br/>
+				<span>Opml format only has feed title and feed url data and therefore cannot replace existing data:</span>
+				<br/>
+				<button id="opmlImportFileButton">Import</button>
+				<button id="opmlExportFileButton">Export</button>
+				<input type="file" accept=".json" id="jsonImportFile" name="jsonImportFile" style="display:none;">
+				<input type="file" accept=".opml" id="opmlImportFile" name="opmlImportFile" style="display:none;">
+				<a href="" download="feeds.json" id="jsonExportFile" style="display:none;"></a>
+				<a href="" download="feeds.opml" id="opmlExportFile" style="display:none;"></a>
 			</div>
 		</div>
 	</body>

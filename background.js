@@ -63,8 +63,12 @@ function onMessage( message , sender , sendResponse ) {
 	if ( message.newItems ) {
 		addNewItems( message.url , message.channel , message.newItems );
 	}
-	if ( message.newChannels ) {
-		message.newChannels.forEach( v => addChannelIfNew( v.href , v.channel ) );
+	if ( message.opmlImport ) {
+		message.opmlImport.forEach( v => addChannelIfNew( v.href , v.channel ) );
+		browser.storage.local.set( { "channels" : channels } );
+	}
+	if ( message.jsonImport ) {
+		Object.assign( channels , message.jsonImport );
 		browser.storage.local.set( { "channels" : channels } );
 	}
 	if ( message.getItems ) {

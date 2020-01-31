@@ -63,20 +63,24 @@ function updateFeed( channel ) {
 	} );
 }
 const getWait = lastUpdated => lastUpdated + timeBetweenUpdates - Date.now();
-const setTimer = wait => timer = setTimeout( updateFeeds , wait );
-function updateFeeds() {
+const setTimer = wait => timer = setTimeout( updateFeedsLoop , wait );
+function updateFeedsLoop() {
 	clearTimeout( timer );
 	let arr = Object.values( channels ).sort( ( a , b ) => a.updated > b.updated );
 	if ( arr.length == 0 ) { // if there are no feeds, do nothing and check again every minute.
 		return setTimer( 10000 );
 	}
-	let timeUntilUpdateFeeds = getWait( arr[0].updated ); // when positive, updateFeeds() was called too early.
+	let timeUntilUpdateFeeds = getWait( arr[0].updated ); // when positive, updateFeedsLoop() was called too early.
 	if ( timeUntilUpdateFeeds > 0 ) {
 		return setTimer( timeUntilUpdateFeeds );
 	}
 	updateFeed( arr[0] );
 	let wait = getWait( arr.length == 1 ? arr[0].updated : arr[1].updated ); // assumes all feeds update at same rate.
 	return setTimer( Math.max( minimumTimeBetweenUpdates , wait ) );
+}
+function updateFeeds( arr ) {
+	arr.forEach( v => v.updated = 0 );
+	updateFeedsLoop();
 }
 function onMessage( message , sender , sendResponse ) {
 	if ( message.markAsRead ) {
@@ -90,15 +94,16 @@ function onMessage( message , sender , sendResponse ) {
 	}
 	if ( message.opmlImport ) {
 		message.opmlImport.forEach( v => addChannelIfNew( v.href , v.channel ) );
-		message.opmlImport.forEach( v => channels[v.channel].updated -= timeBetweenUpdates );
 		browser.storage.local.set( { "channels" : channels } );
-		updateFeeds();
+		updateFeeds( message.opmlImport.map( v => channels[v.channel] ) );
 	}
 	if ( message.jsonImport ) {
 		Object.assign( channels , message.jsonImport );
-		Object.keys( message.jsonImport ).forEach( v => channels[v].updated -= timeBetweenUpdates );
 		browser.storage.local.set( { "channels" : channels } );
-		updateFeeds();
+		updateFeeds( Object.values( message.jsonImport ) );
+	}
+	if ( message.updateAll ) {
+		updateFeeds( Object.values( channels ) );
 	}
 	if ( message.getItems ) {
 		sendResponse( channels[message.getItems].items );
@@ -131,7 +136,7 @@ browser.storage.local.get( null ).then( v => {
 	data = v.channels != undefined ? v : { "channels" : {} , "sections" : [] , "options" : [] };
 	channels = data.channels;
 	setBadge();
-	updateFeeds();
+	updateFeedsLoop();
 } );
 
 

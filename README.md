@@ -11,7 +11,6 @@ Current Features:
 
 TODO
 
-* update all new feeds when importing from both json and opml.
 * update all feeds button.
 * channels context menu containing:
   * update feed.
@@ -30,8 +29,10 @@ Maybe do:
 
 bugs:
 
-* when mass updating some updates fail with this error
+* when mass updating some updates fail with this error:
   * XML Parsing Error: no root element found
   * Location: moz-extension://35b88c68-ee3e-4f33-8e68-e9d2343caa0d/null
   * Line Number 1, Column 1: null:1:1
   * uncaught exception:
+* when mass updating some updates fail with this error:
+  * "TypeError: channels[channel] is undefined" in addNewItems().

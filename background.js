@@ -31,10 +31,7 @@ function onStorageChanged( changes , areaName ) {
 }
 const hostsTags = { "www.royalroad.com" : "royalroad" , "www.youtube.com" : "youtube" };
 function addNewItems( url , channel , items ) {
-	if ( !( channel in channels ) ) {
-		let host = hostsTags[new URL( url ).hostname];
-		channels[channel] = { "items" : [] , "unread" : 0 , "link" : url , "tags" : [host] , "section" : host };
-	}
+	addChannelIfNew( url , channel );
 	let newItems = items.filter( item => channels[channel].items.every( v => v.title != item.title ) );
 	if ( newItems.length > 0 ) {
 		channels[channel].items.push( ...newItems );
@@ -43,8 +40,19 @@ function addNewItems( url , channel , items ) {
 		browser.storage.local.set( { "channels" : channels } );
 	}
 }
-
-
+function addChannelIfNew( href , channel ) {
+	if ( !( channel in channels ) ) {
+		let host = hostsTags[new URL( href ).hostname];
+		channels[channel] = {
+			"items" : [] ,
+			"unread" : 0 ,
+			"link" : href ,
+			"tags" : [host] ,
+			"section" : host ,
+			"title" : channel
+		};
+	}
+}
 function onMessage( message , sender , sendResponse ) {
 	console.log( message );
 	if ( message.markAsRead ) {
@@ -56,7 +64,7 @@ function onMessage( message , sender , sendResponse ) {
 		addNewItems( message.url , message.channel , message.newItems );
 	}
 	if ( message.newChannels ) {
-		message.newChannels.filter( v => !channels[v.title] ).forEach( v => channels[v.title] = v );
+		message.newChannels.forEach( v => addChannelIfNew( v.href , v.channel ) );
 		browser.storage.local.set( { "channels" : channels } );
 	}
 	if ( message.getItems ) {

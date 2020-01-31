@@ -126,13 +126,8 @@ function opmlImport( e ) {
 		let parser = new DOMParser();
 		let xmlDoc = parser.parseFromString( text , "text/xml" );
 		let outlines = xmlDoc.querySelectorAll( "outline[xmlUrl]" );
-
-
 		let channels = Array.from( outlines , v => {
-			let href = v.getAttribute( "xmlUrl" );
-			let host = hostsTags[new URL( href ).hostname];
-			let title = v.getAttribute( "title" );
-			return { "items" : [] , "unread" : 0 , "link" : href , "tags" : [host] , "section" : host , "title" : title };
+			return { "href" : v.getAttribute( "xmlUrl" ) , "channel" : v.getAttribute( "title" ) };
 		} );
 		browser.runtime.sendMessage( { "newChannels" : channels } );
 		// for ( let i = 0; i < outlines.length; i++ ) {
@@ -149,15 +144,15 @@ function opmlExport() {
 	browser.runtime.sendMessage( { "getChannels" : true } ).then( channels => {
 		let parser = new DOMParser();
 		let xmlDoc = parser.parseFromString( opmlTemplate , "text/xml" );
-		let body = xmlDoc.querySelector( "body" );
+		let xmlBody = xmlDoc.querySelector( "body" );
 		for ( let channel in channels ) {
 			let outline = xmlDoc.createElement( "outline" );
 			outline.setAttribute( "text" , channel );
 			outline.setAttribute( "title" , channel );
 			outline.setAttribute( "type" , "rss" );
 			outline.setAttribute( "xmlUrl" , channels[channel].link );
-			body.appendChild( outline );
-			body.appendChild( xmlDoc.createTextNode( "\n" ) );
+			xmlBody.appendChild( outline );
+			xmlBody.appendChild( xmlDoc.createTextNode( "\n" ) );
 		}
 		let serializer = new XMLSerializer();
 		let xmlString = serializer.serializeToString( xmlDoc );

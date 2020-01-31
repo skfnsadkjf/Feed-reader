@@ -56,6 +56,28 @@ function addChannelIfNew( href , channel ) {
 		};
 	}
 }
+function updateFeed( channel ) {
+	channel.updated = Date.now();
+	get( channel.link ).then( data => {
+		addNewItems( data.channel , data.newItems );
+	} );
+}
+const getWait = lastUpdated => lastUpdated + timeBetweenUpdates - Date.now();
+const setTimer = wait => timer = setTimeout( updateFeeds , wait );
+function updateFeeds() {
+	clearTimeout( timer );
+	let arr = Object.values( channels ).sort( ( a , b ) => a.updated > b.updated );
+	if ( arr.length == 0 ) { // if there are no feeds, do nothing and check again every minute.
+		return setTimer( 10000 );
+	}
+	let timeUntilUpdateFeeds = getWait( arr[0].updated ); // when positive, updateFeeds() was called too early.
+	if ( timeUntilUpdateFeeds > 0 ) {
+		return setTimer( timeUntilUpdateFeeds );
+	}
+	updateFeed( arr[0] );
+	let wait = getWait( arr.length == 1 ? arr[0].updated : arr[1].updated ); // assumes all feeds update at same rate.
+	return setTimer( Math.max( minimumTimeBetweenUpdates , wait ) );
+}
 function onMessage( message , sender , sendResponse ) {
 	if ( message.markAsRead ) {
 		channels[message.channel].items.find( v => v.title == message.markAsRead ).unread = false;
@@ -68,11 +90,15 @@ function onMessage( message , sender , sendResponse ) {
 	}
 	if ( message.opmlImport ) {
 		message.opmlImport.forEach( v => addChannelIfNew( v.href , v.channel ) );
+		message.opmlImport.forEach( v => channels[v.channel].updated -= timeBetweenUpdates );
 		browser.storage.local.set( { "channels" : channels } );
+		updateFeeds();
 	}
 	if ( message.jsonImport ) {
 		Object.assign( channels , message.jsonImport );
+		Object.keys( message.jsonImport ).forEach( v => channels[v].updated -= timeBetweenUpdates );
 		browser.storage.local.set( { "channels" : channels } );
+		updateFeeds();
 	}
 	if ( message.getItems ) {
 		sendResponse( channels[message.getItems].items );
@@ -95,25 +121,7 @@ function browserActionOnClicked() {
 	} );
 }
 
-
-const getWait = lastUpdated => lastUpdated + timeBetweenUpdates - Date.now();
-function updateFeeds() {
-	let arr = Object.values( channels ).sort( ( a , b ) => a.updated > b.updated );
-	if ( arr.length == 0 ) { // if there are no feeds, do nothing and check again every minute.
-		return setTimeout( updateFeeds , 10000 );
-	}
-	let timeUntilUpdateFeeds = getWait( arr[0].updated ); // when positive, updateFeeds() was called too early.
-	if ( timeUntilUpdateFeeds > 0 ) {
-		return setTimeout( updateFeeds , timeUntilUpdateFeeds );
-	}
-	arr[0].updated = Date.now();
-	get( arr[0].link ).then( data => {
-		addNewItems( data.channel , data.newItems );
-	} );
-	let wait = getWait( arr.length == 1 ? arr[0].updated : arr[1].updated );
-	setTimeout( updateFeeds , Math.max( minimumTimeBetweenUpdates , wait ) );
-}
-
+let timer;
 let channels;
 let data;
 browser.runtime.onMessage.addListener( onMessage );

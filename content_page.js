@@ -73,13 +73,6 @@ function showCustomContextMenu( e ) {
 	document.getElementById( "contextMenu" ).style.left = e.clientX + "px";
 	document.getElementById( "contextMenu" ).style.top = e.clientY + "px";
 }
-const hideCustomContextMenu = e => document.getElementById( "contextMenu" ).style.display = "none";
-window.addEventListener( "blur" , hideCustomContextMenu );
-window.addEventListener( "click" , hideCustomContextMenu );
-window.addEventListener( "keydown" , hideCustomContextMenu );
-document.getElementById( "contextMenuUpdate" ).addEventListener( "click" , channelUpdate );
-document.getElementById( "contextMenuMarkAllRead" ).addEventListener( "click" , channelMarkAllRead );
-document.getElementById( "contextMenuDelete" ).addEventListener( "click" , channelDelete );
 function makeChannels( channels ) {
 	removeChildren( "channels" );
 	makeChannelSections( channels );
@@ -211,9 +204,13 @@ function jsonExport() {
 		URL.revokeObjectURL( a.href );
 	} );
 }
+const hideCustomContextMenu = e => document.getElementById( "contextMenu" ).style.display = "none";
 const updateAllFeeds = e => browser.runtime.sendMessage( { "updateAll" : true } );
 const jsonImportButton = e => document.getElementById( "jsonImportFile" ).click();
 const opmlImportButton = e => document.getElementById( "opmlImportFile" ).click();
+window.addEventListener( "blur" , hideCustomContextMenu );
+window.addEventListener( "click" , hideCustomContextMenu );
+window.addEventListener( "keydown" , hideCustomContextMenu );
 document.getElementById( "dragBar" ).addEventListener( "mousedown" , dragBar );
 document.getElementById( "loadNewChannel" ).addEventListener( "submit" , loadNewChannel );
 document.getElementById( "updateAll" ).addEventListener( "click" , updateAllFeeds );
@@ -223,15 +220,10 @@ document.getElementById( "jsonImportFile" ).addEventListener( "change" , jsonImp
 document.getElementById( "opmlImportFile" ).addEventListener( "change" , opmlImport );
 document.getElementById( "jsonExportFileButton" ).addEventListener( "click" , jsonExport );
 document.getElementById( "opmlExportFileButton" ).addEventListener( "click" , opmlExport );
+document.getElementById( "contextMenuUpdate" ).addEventListener( "click" , channelUpdate );
+document.getElementById( "contextMenuMarkAllRead" ).addEventListener( "click" , channelMarkAllRead );
+document.getElementById( "contextMenuDelete" ).addEventListener( "click" , channelDelete );
 browser.storage.onChanged.addListener( onStorageChanged );
 window.onunload = e => browser.storage.onChanged.removeListener( onStorageChanged );
 browser.runtime.sendMessage( { "getChannels" : true } ).then( v => makeChannels( v ) );
 
-
-
-
-
-// add context menu on right click channel
-// add context menu html
-// kill context menu on page lose focus // maybe use focus/blur event?
-// kill context menu on click outside context menu // maybe use focus/blur event?

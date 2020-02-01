@@ -82,9 +82,24 @@ function onMessage( message , sender , sendResponse ) {
 		setUnread( message.channel );
 		browser.storage.local.set( { "channels" : channels } );
 	}
+	if ( message.markAllRead ) {
+		channels[message.markAllRead].items.forEach( v => v.unread = false );
+		setUnread( message.markAllRead );
+		browser.storage.local.set( { "channels" : channels } );
+	}
 	if ( message.newItems ) {
 		addChannelIfNew( message.url , message.channel );
 		addNewItems( message.channel , message.newItems );
+	}
+	if ( message.update ) {
+		updateFeed( channels[message.update] );
+	}
+	if ( message.updateAll ) {
+		updateFeeds( Object.values( channels ) );
+	}
+	if ( message.delete ) {
+		delete channels[message.delete];
+		browser.storage.local.set( { "channels" : channels } );
 	}
 	if ( message.opmlImport ) {
 		message.opmlImport.forEach( v => addChannelIfNew( v.href , v.channel ) );
@@ -95,9 +110,6 @@ function onMessage( message , sender , sendResponse ) {
 		Object.assign( channels , message.jsonImport );
 		browser.storage.local.set( { "channels" : channels } );
 		updateFeeds( Object.values( message.jsonImport ) );
-	}
-	if ( message.updateAll ) {
-		updateFeeds( Object.values( channels ) );
 	}
 	if ( message.getItems ) {
 		sendResponse( channels[message.getItems].items );

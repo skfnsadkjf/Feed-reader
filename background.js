@@ -1,3 +1,5 @@
+'use strict';
+
 const timeBetweenUpdates = 86400000; // 86400000; 1 day.
 const minimumTimeBetweenUpdates = 2000;
 const hostsTags = { "www.royalroad.com" : "royalroad" , "www.youtube.com" : "youtube" };
@@ -111,7 +113,8 @@ function updateFeeds( arr ) {
 }
 function onMessage( message , sender , sendResponse ) {
 	if ( message.markAsRead ) {
-		channels[message.channel].items.find( v => v.title == message.markAsRead ).unread = false;
+		let item = channels[message.channel].items.find( v => v.title == message.item );
+		item.unread = !item.unread;
 		setUnread( message.channel );
 		browser.storage.local.set( { "channels" : channels } );
 	}

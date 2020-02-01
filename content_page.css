@@ -82,7 +82,7 @@ body{
 	text-overflow: ellipsis;
 	font-weight: bold;
 }
-.item a.read{
+.item a{
 	color: #FFFFFF;
 }
 .item a.unread{
@@ -94,10 +94,12 @@ body{
 .item>div>*{
 	position: absolute;
 }
-.itemMarkRead,.itemDate{
+.itemMarkRead{
 	right: 0px;
+	cursor: pointer;
 }
 .itemDate{
+	right: 0px;
 	font-family: sans-serif;
 }
 

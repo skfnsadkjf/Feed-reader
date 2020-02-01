@@ -19,9 +19,7 @@ function dragBar( e ) {
 	e.preventDefault();
 	e.stopPropagation();
 }
-function getItem( elem ){
-	return elem.parentElement.id == "items" ? elem : getItem( elem.parentElement );
-}
+const getItem = elem => elem.title ? elem : getItem( elem.parentElement );
 const getChannel = elem => elem.title ? elem : getChannel( elem.parentElement );
 
 function removeChildren( id ) {
@@ -29,6 +27,44 @@ function removeChildren( id ) {
 	while ( elem.firstChild ) {
 		elem.removeChild( elem.firstChild );
 	}
+}
+function channelUpdate( e ) {
+	let channel = document.querySelector( ".activeChannel" ).title;
+	browser.runtime.sendMessage( { "update" : channel } );
+}
+function itemMarkAsRead( e ) {
+	let item = getItem( e.target );
+	item.querySelector( "a" ).classList.toggle( "unread" );
+	browser.runtime.sendMessage( { "markAsRead" : true , "channel" : activeChannel , "item" : item.title } );
+}
+function channelMarkAllRead( e ) {
+	let channel = document.querySelector( ".activeChannel" ).title;
+	browser.runtime.sendMessage( { "markAllRead" : channel } );
+}
+function channelDelete( e ) {
+	let channel = document.querySelector( ".activeChannel" ).title;
+	let confirmDelete = confirm( "Are you sure you want to completely remove feed: " + channel );
+	if ( confirmDelete ) {
+		activeChannel = null;
+		removeChildren( "items" );
+		browser.runtime.sendMessage( { "delete" : channel } );
+	}
+}
+function setActiveChannel( e ) {
+	if ( activeChannel ) {
+		document.querySelector( ".activeChannel" ).classList.remove( "activeChannel" );
+	}
+	let channel = getChannel( e.target );
+	channel.classList.add( "activeChannel" );
+	activeChannel = channel.title;
+	makeItems( activeChannel );
+}
+function showCustomContextMenu( e ) {
+	e.preventDefault();
+	setActiveChannel( e );
+	document.getElementById( "contextMenu" ).style.display = "initial";
+	document.getElementById( "contextMenu" ).style.left = e.clientX + "px";
+	document.getElementById( "contextMenu" ).style.top = e.clientY + "px";
 }
 function makeChannelSections( channels ) {
 	let x = Object.keys( channels ).map( channel => channels[channel].section );
@@ -39,40 +75,6 @@ function makeChannelSections( channels ) {
 		t.content.querySelector( "div" ).id = section;
 		document.querySelector( "#channels" ).appendChild( t.content );
 	} );
-}
-function setActiveChannel( elem ) {
-	const activeChannel = document.querySelector( ".activeChannel" );
-	if ( activeChannel ) {
-		activeChannel.classList.remove( "activeChannel" );
-	}
-	elem.classList.add( "activeChannel" );
-}
-function channelUpdate( e ) {
-	let channel = document.querySelector( ".activeChannel" ).title;
-	browser.runtime.sendMessage( { "update" : channel } );
-}
-function channelMarkAllRead( e ) {
-	let channel = document.querySelector( ".activeChannel" ).title;
-	browser.runtime.sendMessage( { "markAllRead" : channel } );
-}
-function channelDelete( e ) {
-	let channel = document.querySelector( ".activeChannel" ).title;
-	let confirmDelete = confirm( "Are you sure you want to completely remove feed: " + channel );
-	if ( confirmDelete ) {
-		browser.runtime.sendMessage( { "delete" : channel } );
-	}
-}
-function channelClick( e ) {
-	let channel = getChannel( e.target );
-	setActiveChannel( getChannel( e.target ) );
-	makeItems( channel.title );
-}
-function showCustomContextMenu( e ) {
-	e.preventDefault();
-	channelClick( e );
-	document.getElementById( "contextMenu" ).style.display = "initial";
-	document.getElementById( "contextMenu" ).style.left = e.clientX + "px";
-	document.getElementById( "contextMenu" ).style.top = e.clientY + "px";
 }
 function makeChannels( channels ) {
 	removeChildren( "channels" );
@@ -86,9 +88,11 @@ function makeChannels( channels ) {
 		let unreadCount = channels[channel].items.filter( v => v.unread ).length;
 		t.content.querySelector( ".unread" ).textContent = unreadCount > 0 ? unreadCount : "";
 		t.content.firstChild.title = channel; // all children must not have title attribute.
-		t.content.firstChild.addEventListener( "click" , channelClick );
+		t.content.firstChild.addEventListener( "click" , setActiveChannel );
 		t.content.firstChild.addEventListener( "contextmenu" , showCustomContextMenu );
-		// document.querySelector( "#channels" ).appendChild( t.content );
+		if ( channel == activeChannel )  {
+			t.content.firstChild.classList.add( "activeChannel" );
+		}
 		document.querySelector( "#" + channels[channel].section ).appendChild( t.content );
 	}
 }
@@ -102,10 +106,8 @@ function makeItems( channel ) {
 			t.content.querySelector( "a" ).className = ( item.unread ) ? "unread" : "read";
 			t.content.querySelector( ".itemChannel" ).textContent = channel;
 			t.content.querySelector( ".itemDate" ).textContent = getDate( item.pubDate );
-			t.content.querySelector( ".itemMarkRead" ).addEventListener( "click" , e => {
-				getItem( e.target ).querySelector( "a" ).className = "read";
-				browser.runtime.sendMessage( { "markAsRead" : item.title , "channel" : channel } );
-			} );
+			t.content.firstChild.title = item.title; // all children must not have title attribute.
+			t.content.querySelector( ".itemMarkRead" ).addEventListener( "click" , itemMarkAsRead );
 			document.querySelector( "#items" ).appendChild( t.content );
 		} );
 	} );
@@ -200,6 +202,7 @@ function jsonExport() {
 		URL.revokeObjectURL( a.href );
 	} );
 }
+let activeChannel = null;
 const hideCustomContextMenu = e => document.getElementById( "contextMenu" ).style.display = "none";
 const updateAllFeeds = e => browser.runtime.sendMessage( { "updateAll" : true } );
 const jsonImportButton = e => document.getElementById( "jsonImportFile" ).click();

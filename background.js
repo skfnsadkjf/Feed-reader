@@ -26,13 +26,6 @@ function setBadge() {
 	browser.browserAction.setBadgeText( { "text" : x.toString() } );
 }
 
-function onStorageChanged( changes , areaName ) {
-	Object.keys( changes ).forEach( key => {
-		data[key] = changes[key].newValue;
-	} );
-	channels = data.channels;
-	setBadge();
-}
 function addNewItems( channel , items ) {
 	let newItems = items.filter( item => channels[channel].items.every( v => v.title != item.title ) );
 	if ( newItems.length > 0 ) {
@@ -131,7 +124,6 @@ let timer;
 let channels;
 let data;
 browser.runtime.onMessage.addListener( onMessage );
-browser.storage.onChanged.addListener( onStorageChanged );
 browser.browserAction.onClicked.addListener( browserActionOnClicked );
 browser.storage.local.get( null ).then( v => {
 	data = v.channels != undefined ? v : { "channels" : {} , "sections" : [] , "options" : [] };

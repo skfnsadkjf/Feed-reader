@@ -49,10 +49,37 @@ function setActiveChannel( elem ) {
 	}
 	elem.classList.add( "activeChannel" );
 }
-function channelClick( e ) {
-	setActiveChannel( getChannel( e.target ) );
-	makeItems( channel );
+function channelUpdate( e ) {
+	let channel = document.querySelector( ".activeChannel" ).title;
+	browser.runtime.sendMessage( { "update" : channel } );
 }
+function channelMarkAllRead( e ) {
+	let channel = document.querySelector( ".activeChannel" ).title;
+	browser.runtime.sendMessage( { "markAllRead" : channel } );
+}
+function channelDelete( e ) {
+	let channel = document.querySelector( ".activeChannel" ).title;
+	browser.runtime.sendMessage( { "delete" : channel } );
+}
+function channelClick( e ) {
+	let channel = getChannel( e.target );
+	setActiveChannel( getChannel( e.target ) );
+	makeItems( channel.title );
+}
+function showCustomContextMenu( e ) {
+	e.preventDefault();
+	channelClick( e );
+	document.getElementById( "contextMenu" ).style.display = "initial";
+	document.getElementById( "contextMenu" ).style.left = e.clientX + "px";
+	document.getElementById( "contextMenu" ).style.top = e.clientY + "px";
+}
+const hideCustomContextMenu = e => document.getElementById( "contextMenu" ).style.display = "none";
+window.addEventListener( "blur" , hideCustomContextMenu );
+window.addEventListener( "click" , hideCustomContextMenu );
+window.addEventListener( "keydown" , hideCustomContextMenu );
+document.getElementById( "contextMenuUpdate" ).addEventListener( "click" , channelUpdate );
+document.getElementById( "contextMenuMarkAllRead" ).addEventListener( "click" , channelMarkAllRead );
+document.getElementById( "contextMenuDelete" ).addEventListener( "click" , channelDelete );
 function makeChannels( channels ) {
 	removeChildren( "channels" );
 	makeChannelSections( channels );
@@ -66,6 +93,7 @@ function makeChannels( channels ) {
 		t.content.querySelector( ".unread" ).textContent = unreadCount > 0 ? unreadCount : "";
 		t.content.firstChild.title = channel; // all children must not have title attribute.
 		t.content.firstChild.addEventListener( "click" , channelClick );
+		t.content.firstChild.addEventListener( "contextmenu" , showCustomContextMenu );
 		// document.querySelector( "#channels" ).appendChild( t.content );
 		document.querySelector( "#" + channels[channel].section ).appendChild( t.content );
 	}
@@ -99,8 +127,8 @@ function onStorageChanged( changes , areaName ) {
 // https://validator.w3.org/feed/docs/rss2.html
 // http://frogs.dongs
 // dongs
-const addChannelPopupStatusElem = document.getElementById( "addChannelPopupStatus" );
 function loadChannelStatus( errorText ) {
+	let addChannelPopupStatusElem = document.getElementById( "addChannelPopupStatus" );
 	let isError = errorText != "Success!";
 	addChannelPopupStatusElem.style.color = isError ? "red" : "green";
 	addChannelPopupStatusElem.textContent = errorText;
@@ -200,3 +228,10 @@ window.onunload = e => browser.storage.onChanged.removeListener( onStorageChange
 browser.runtime.sendMessage( { "getChannels" : true } ).then( v => makeChannels( v ) );
 
 
+
+
+
+// add context menu on right click channel
+// add context menu html
+// kill context menu on page lose focus // maybe use focus/blur event?
+// kill context menu on click outside context menu // maybe use focus/blur event?

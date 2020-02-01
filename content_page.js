@@ -59,7 +59,10 @@ function channelMarkAllRead( e ) {
 }
 function channelDelete( e ) {
 	let channel = document.querySelector( ".activeChannel" ).title;
-	browser.runtime.sendMessage( { "delete" : channel } );
+	let confirmDelete = confirm( "Are you sure you want to completely remove feed: " + channel );
+	if ( confirmDelete ) {
+		browser.runtime.sendMessage( { "delete" : channel } );
+	}
 }
 function channelClick( e ) {
 	let channel = getChannel( e.target );

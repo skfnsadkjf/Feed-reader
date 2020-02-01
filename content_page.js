@@ -1,5 +1,3 @@
-import { get } from "/get_feed.js";
-
 const dateOptions = { "weekday" : "short" , "year" : "numeric" , "month" : "short" , "day" : "2-digit" ,
 	"hour" : "2-digit" , "minute" : "2-digit" , "second" : "2-digit" , "hour12" : false };
 const times = [0 , 1000 , 60000 , 3600000 , 86400000 , 604800000 , 2419200000 , 31536000000 , Infinity];
@@ -131,19 +129,14 @@ function loadChannelStatus( errorText ) {
 }
 function loadNewChannel( e ) {
 	e.preventDefault();
-	let url;
-	try {
-		url = new URL( document.getElementById( "loadNewChannelTextInput" ).value );
-	} catch ( err ) {
-		return loadChannelStatus( "Field requires a valid URL" );
+	let url = document.getElementById( "loadNewChannelTextInput" ).value;
+	if ( !url.match( /.:/ ) ) { // Valid URLs only require a single colon proceeded by at least 1 character.
+		return loadChannelStatus( "Field requires a URL" );
 	}
-	get( url.href ).then( data => {
-		if ( data === false ) {
-			return loadChannelStatus( "URL isn't an RSS or Atom page." );
-		}
-		loadChannelStatus( "Success!" );
-		browser.runtime.sendMessage( { "url" : url.href , "channel" : data.channel , "newItems" : data.newItems } );
-	} , error => loadChannelStatus( "Failed to load URL." ) );
+	console.log( url );
+	browser.runtime.sendMessage( { "newChannelURL" : url } ).then( error => {
+		loadChannelStatus( error ? "Failed to load URL." : "Success!" );
+	} );
 }
 
 const opmlTemplate = `<?xml version="1.0" encoding="UTF-8"?>

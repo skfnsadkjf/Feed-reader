@@ -62,20 +62,21 @@ body{
 .item{
 	background-color: #222222;
 	margin: 2px 10px 0px 10px;
-	padding: 3px 5px 2px 5px;
-	height: 29px;
+	padding: 0px 5px 0px 5px;
+	height: 35px;
 	--buttonWidth: 50px;
 }
 .item>div:first-child{
-	font-size: 15px;
-	line-height: 14px;
+	font-size: 16px;
+	top: -1px;
 }
 .item>div:last-child{
 	font-size: 11px;
-	top: 15px;
+	top: 18px;
 }
 .item a{
 	max-width: calc( 100% - var(--buttonWidth) );
+	text-decoration: none;
 	overflow-x: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;

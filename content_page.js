@@ -24,6 +24,7 @@ function dragBar( e ) {
 function getItem( elem ){
 	return elem.parentElement.id == "items" ? elem : getItem( elem.parentElement );
 }
+const getChannel = elem => elem.title ? elem : getChannel( elem.parentElement );
 
 function removeChildren( id ) {
 	let elem = document.getElementById( id );
@@ -41,6 +42,17 @@ function makeChannelSections( channels ) {
 		document.querySelector( "#channels" ).appendChild( t.content );
 	} );
 }
+function setActiveChannel( elem ) {
+	const activeChannel = document.querySelector( ".activeChannel" );
+	if ( activeChannel ) {
+		activeChannel.classList.remove( "activeChannel" );
+	}
+	elem.classList.add( "activeChannel" );
+}
+function channelClick( e ) {
+	setActiveChannel( getChannel( e.target ) );
+	makeItems( channel );
+}
 function makeChannels( channels ) {
 	removeChildren( "channels" );
 	makeChannelSections( channels );
@@ -52,7 +64,8 @@ function makeChannels( channels ) {
 		t.content.querySelector( "img" ).src = icon;
 		let unreadCount = channels[channel].items.filter( v => v.unread ).length;
 		t.content.querySelector( ".unread" ).textContent = unreadCount > 0 ? unreadCount : "";
-		t.content.firstChild.addEventListener( "click" , e => makeItems( channel ) );
+		t.content.firstChild.title = channel; // all children must not have title attribute.
+		t.content.firstChild.addEventListener( "click" , channelClick );
 		// document.querySelector( "#channels" ).appendChild( t.content );
 		document.querySelector( "#" + channels[channel].section ).appendChild( t.content );
 	}

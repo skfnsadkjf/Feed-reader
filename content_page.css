@@ -21,16 +21,20 @@ body{
 	margin-left: var(--leftPanelWidth);
 }
 
+
+
 #settings{
 	margin: 10px;
 }
 
+
+
 #channels{
 	background-color: #111111;
-	width: calc( var(--leftPanelWidth) - 20px );
-	padding: 0px 10px 0px 10px;
+	width: calc( var(--leftPanelWidth) );
 }
 .channel{
+	padding: 0px 10px 0px 10px;
 	cursor: pointer;
 	overflow-x: hidden;
 	white-space: nowrap;
@@ -43,6 +47,9 @@ body{
 	height: 16px;
 	margin-right: 5px;
 	vertical-align: middle;
+}
+.activeChannel{
+	background-color: #444444;
 }
 
 

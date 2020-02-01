@@ -8,13 +8,10 @@ Current Features:
   * can filter this to only be total unread items from channels with x tag. Currently hardcoded.
 * each item shows it's title, feed title, pubdate and time since pubdate.
 * items have a "read" button to declare they've been read.
+* feeds can be updated, marked as read, or deleted via a custom context menu.
 
 TODO
 
-* channels context menu containing:
-  * update feed.
-  * delete feed.
-  * mark all as read.
 * content script that detects if a page has a feed.
 * add manga
   * Not sure how manga would fit into the page without mad scrolling becoming a thing.

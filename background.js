@@ -52,6 +52,7 @@ function setBadge() {
 function setUnread( channel ) {
 	channel.unread = channel.items.filter( v => v.unread ).length;
 	setBadge();
+	browser.storage.local.set( { [channel.title] : channel } );
 }
 function addNewItems( channel , items ) {
 	let newItems = items.filter( item => channel.items.every( v => v.title != item.title ) );
@@ -59,7 +60,7 @@ function addNewItems( channel , items ) {
 		channel.items.push( ...newItems );
 		channel.items.sort( ( a , b ) => a.pubDate < b.pubDate );
 		channel.unread = channel.items.filter( v => v.unread ).length;
-		browser.storage.local.set( { "channels" : channels } );
+		browser.storage.local.set( { [channel.title] : channel } );
 	}
 }
 function addChannelIfNew( href , title ) {
@@ -109,12 +110,10 @@ function onMessage( message , sender , sendResponse ) {
 		let item = channel.items.find( v => v.title == message.item );
 		item.unread = !item.unread;
 		setUnread( channel );
-		browser.storage.local.set( { "channels" : channels } );
 	}
 	if ( message.markAllRead ) {
 		channel.items.forEach( v => v.unread = false );
 		setUnread( channel );
-		browser.storage.local.set( { "channels" : channels } );
 	}
 	if ( message.update ) {
 		updateFeed( channel );
@@ -124,16 +123,17 @@ function onMessage( message , sender , sendResponse ) {
 	}
 	if ( message.delete ) {
 		delete channels[message.title];
-		browser.storage.local.set( { "channels" : channels } );
+		setBadge();
+		browser.storage.local.remove( channel.title );
 	}
 	if ( message.opmlImport ) {
 		message.opmlImport.forEach( v => addChannelIfNew( v.href , v.title ) );
-		browser.storage.local.set( { "channels" : channels } );
+		browser.storage.local.set( channels );
 		updateFeeds( message.opmlImport.map( v => channels[v.title] ) );
 	}
 	if ( message.jsonImport ) {
 		Object.assign( channels , message.jsonImport );
-		browser.storage.local.set( { "channels" : channels } );
+		browser.storage.local.set( channels );
 		updateFeeds( Object.values( message.jsonImport ) );
 	}
 	if ( message.getItems ) {
@@ -165,12 +165,10 @@ function browserActionOnClicked() {
 
 let timer;
 let channels;
-let data;
 browser.runtime.onMessage.addListener( onMessage );
 browser.browserAction.onClicked.addListener( browserActionOnClicked );
 browser.storage.local.get( null ).then( v => {
-	data = v.channels != undefined ? v : { "channels" : {} , "sections" : [] , "options" : [] };
-	channels = data.channels;
+	channels = v != undefined ? v : {};
 	setBadge();
 	updateFeedsLoop();
 } );

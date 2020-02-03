@@ -13,8 +13,6 @@ Current Features:
 TODO
 
 * use custom sorting for sections
-* sort entries alphbetically in their respective sections.
-* rejigger data
 
 * content script that detects if a page has a feed.
 * add manga

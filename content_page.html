@@ -10,10 +10,14 @@
 		<template id="channelSectionTemplate"><div class="channelSection"><div></div><div></div></div></template>
 	</head>
 	<body>
-		<div id="channels" class="panel"></div>
+		<div id="channels" class="panel">
+			<div class="channelSection" id="noSection"></div>
+			<div class="channelSection" id="royalroad">royalroad</div>
+			<div class="channelSection" id="youtube">youtube</div>
+		</div>
 		<div id="dragBar" class="panel"></div>
 		<div id="items" class="panel">
-			<div id="settings"> <!-- Maybe this should be a template so that I can reopen it with JS after it gets removed. -->
+			<div id="settings" class="item"> <!-- Maybe this should be a template so that I can reopen it with JS after it gets removed. -->
 				<h3>Add new feed.</h3>
 				<div>
 					<span>Feed URL:</span>

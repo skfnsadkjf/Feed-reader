@@ -22,12 +22,6 @@ function dragBar( e ) {
 const getItem = elem => elem.title ? elem : getItem( elem.parentElement );
 const getChannel = elem => elem.title ? elem : getChannel( elem.parentElement );
 
-function removeChildren( id ) {
-	let elem = document.getElementById( id );
-	while ( elem.firstChild ) {
-		elem.removeChild( elem.firstChild );
-	}
-}
 function channelUpdate( e ) {
 	browser.runtime.sendMessage( { "update" : true , "title" : activeChannel } );
 }
@@ -44,13 +38,13 @@ function channelDelete( e ) {
 	let confirmDelete = confirm( "Are you sure you want to completely remove feed: " + title );
 	if ( confirmDelete ) {
 		activeChannel = null;
-		removeChildren( "items" );
+		document.querySelectorAll( ".item" ).forEach( v => v.remove() );
 		browser.runtime.sendMessage( { "delete" : true , "title" : title } );
 	}
 }
 function makeItems( title ) {
 	browser.runtime.sendMessage( { "getItems" : true , "title" : title } ).then( items => {
-		removeChildren( "items" );
+		document.querySelectorAll( ".item" ).forEach( v => v.remove() );
 		items.forEach( item => {
 			let t = document.importNode( document.getElementById( "itemTemplate" ) , true );
 			t.content.querySelector( "a" ).textContent = item.title;
@@ -80,20 +74,21 @@ function showCustomContextMenu( e ) {
 	document.getElementById( "contextMenu" ).style.top = e.clientY + "px";
 	setActiveChannel( e );
 }
-function makeChannelSections( channels ) {
-	let x = Object.values( channels ).map( channel => channel.section );
-	let sections = x.filter( ( v , i , arr ) => v && arr.indexOf( v ) == i ).sort();
-	sections.forEach( section => {
-		let t = document.importNode( document.getElementById( "channelSectionTemplate" ) , true );
-		t.content.querySelector( ".channelSection:first-child" ).textContent = section;
-		t.content.querySelector( "div" ).id = section;
-		document.querySelector( "#channels" ).appendChild( t.content );
-	} );
-}
+// function makeChannelSections( channels ) {
+// 	let x = Object.values( channels ).map( channel => channel.section );
+// 	let sections = x.filter( ( v , i , arr ) => v && arr.indexOf( v ) == i ).sort();
+// 	sections.forEach( section => {
+// 		let t = document.importNode( document.getElementById( "channelSectionTemplate" ) , true );
+// 		t.content.querySelector( ".channelSection:first-child" ).textContent = section;
+// 		t.content.querySelector( "div" ).id = section;
+// 		document.querySelector( "#channels" ).appendChild( t.content );
+// 	} );
+// }
 function makeChannels( channels ) {
-	removeChildren( "channels" );
-	makeChannelSections( channels );
-	Object.values( channels ).forEach( channel => {
+	document.querySelectorAll( ".channel" ).forEach( v => v.remove() );
+	// makeChannelSections( channels );
+	let channelsArray = Object.values( channels ).sort( ( a , b ) => a.title > b.title )
+	channelsArray.forEach( channel => {
 		let t = document.importNode( document.getElementById( "channelTemplate" ) , true );
 		t.content.querySelector( ".title" ).textContent = channel.title;
 		let url = new URL( channel.link );
@@ -109,7 +104,7 @@ function makeChannels( channels ) {
 			t.content.firstChild.classList.add( "activeChannel" );
 		}
 		let section = document.querySelector( "#" + channel.section );
-		let parent = section != null ? section : document.getElementById( "channels" );
+		let parent = section != null ? section : document.getElementById( "noSection" );
 		parent.appendChild( t.content );
 	} );
 }

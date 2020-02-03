@@ -75,10 +75,10 @@ function setActiveChannel( e ) {
 }
 function showCustomContextMenu( e ) {
 	e.preventDefault();
-	setActiveChannel( e );
 	document.getElementById( "contextMenu" ).style.display = "initial";
 	document.getElementById( "contextMenu" ).style.left = e.clientX + "px";
 	document.getElementById( "contextMenu" ).style.top = e.clientY + "px";
+	setActiveChannel( e );
 }
 function makeChannelSections( channels ) {
 	let x = Object.values( channels ).map( channel => channel.section );
@@ -100,6 +100,7 @@ function makeChannels( channels ) {
 		let icon = "https://icons.duckduckgo.com/ip3/" + url.hostname + ".ico"
 		t.content.querySelector( "img" ).src = icon;
 		let unreadCount = channel.items.filter( v => v.unread ).length;
+		t.content.querySelector( ".title" ).style["font-weight"] = unreadCount > 0 ? "bold" : "";
 		t.content.querySelector( ".unread" ).textContent = unreadCount > 0 ? unreadCount : "";
 		t.content.firstChild.title = channel.title; // all children must not have title attribute.
 		t.content.firstChild.addEventListener( "click" , setActiveChannel );
@@ -116,7 +117,8 @@ function makeChannels( channels ) {
 
 
 function onStorageChanged( changes , areaName ) {
-	makeChannels( changes.channels.newValue );
+	// makeChannels( changes.channels.newValue );
+	browser.runtime.sendMessage( { "getChannels" : true } ).then( v => makeChannels( v ) );
 }
 
 // https://www.royalroad.com/fiction/syndication/16946

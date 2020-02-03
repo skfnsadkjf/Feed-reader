@@ -12,6 +12,8 @@ Current Features:
 
 TODO
 
+* use custom sorting for sections
+* sort entries alphbetically in their respective sections.
 * rejigger data
 
 * content script that detects if a page has a feed.
@@ -19,9 +21,16 @@ TODO
   * Not sure how manga would fit into the page without mad scrolling becoming a thing.
   * maybe make each section expandable
   * maybe make a manga channel that has a custom items window.
+  * Here's how it be:
+    * update and port manga addon. with updates:
+      * have export/import data buttons
+      * don't check complete/oneshot manga
+      * make RSS xlm that this addon can read.
+    * select the few manga I regularly read and add them to this addon.
 
 Maybe do:
 
+* put unsorted entries somewhere intelligent. Not sure where yet.
 * add options page.
 * channel sections should have a total number of unread in section.
 

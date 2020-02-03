@@ -29,26 +29,40 @@ function removeChildren( id ) {
 	}
 }
 function channelUpdate( e ) {
-	let channel = document.querySelector( ".activeChannel" ).title;
-	browser.runtime.sendMessage( { "update" : channel } );
+	browser.runtime.sendMessage( { "update" : true , "title" : activeChannel } );
 }
 function itemMarkAsRead( e ) {
 	let item = getItem( e.target );
 	item.querySelector( "a" ).classList.toggle( "unread" );
-	browser.runtime.sendMessage( { "markAsRead" : true , "channel" : activeChannel , "item" : item.title } );
+	browser.runtime.sendMessage( { "markAsRead" : true , "title" : activeChannel , "item" : item.title } );
 }
 function channelMarkAllRead( e ) {
-	let channel = document.querySelector( ".activeChannel" ).title;
-	browser.runtime.sendMessage( { "markAllRead" : channel } );
+	browser.runtime.sendMessage( { "markAllRead" : true , "title" : activeChannel } );
 }
 function channelDelete( e ) {
-	let channel = document.querySelector( ".activeChannel" ).title;
-	let confirmDelete = confirm( "Are you sure you want to completely remove feed: " + channel );
+	let title = document.querySelector( ".activeChannel" ).title;
+	let confirmDelete = confirm( "Are you sure you want to completely remove feed: " + title );
 	if ( confirmDelete ) {
 		activeChannel = null;
 		removeChildren( "items" );
-		browser.runtime.sendMessage( { "delete" : channel } );
+		browser.runtime.sendMessage( { "delete" : true , "title" : title } );
 	}
+}
+function makeItems( title ) {
+	browser.runtime.sendMessage( { "getItems" : true , "title" : title } ).then( items => {
+		removeChildren( "items" );
+		items.forEach( item => {
+			let t = document.importNode( document.getElementById( "itemTemplate" ) , true );
+			t.content.querySelector( "a" ).textContent = item.title;
+			t.content.querySelector( "a" ).href = item.link;
+			t.content.querySelector( "a" ).className = ( item.unread ) ? "unread" : "read";
+			t.content.querySelector( ".itemChannel" ).textContent = title;
+			t.content.querySelector( ".itemDate" ).textContent = getDate( item.pubDate );
+			t.content.firstChild.title = item.title; // all children must not have title attribute.
+			t.content.querySelector( ".itemMarkRead" ).addEventListener( "click" , itemMarkAsRead );
+			document.querySelector( "#items" ).appendChild( t.content );
+		} );
+	} );
 }
 function setActiveChannel( e ) {
 	if ( activeChannel ) {
@@ -79,39 +93,23 @@ function makeChannelSections( channels ) {
 function makeChannels( channels ) {
 	removeChildren( "channels" );
 	makeChannelSections( channels );
-	for ( let channel in channels ) {
+	Object.values( channels ).forEach( channel => {
 		let t = document.importNode( document.getElementById( "channelTemplate" ) , true );
-		t.content.querySelector( ".title" ).textContent = channel;
-		let url = new URL(channels[channel].link);
+		t.content.querySelector( ".title" ).textContent = channel.title;
+		let url = new URL( channel.link );
 		let icon = "https://icons.duckduckgo.com/ip3/" + url.hostname + ".ico"
 		t.content.querySelector( "img" ).src = icon;
-		let unreadCount = channels[channel].items.filter( v => v.unread ).length;
+		let unreadCount = channel.items.filter( v => v.unread ).length;
 		t.content.querySelector( ".unread" ).textContent = unreadCount > 0 ? unreadCount : "";
-		t.content.firstChild.title = channel; // all children must not have title attribute.
+		t.content.firstChild.title = channel.title; // all children must not have title attribute.
 		t.content.firstChild.addEventListener( "click" , setActiveChannel );
 		t.content.firstChild.addEventListener( "contextmenu" , showCustomContextMenu );
-		if ( channel == activeChannel )  {
+		if ( channel.title == activeChannel )  {
 			t.content.firstChild.classList.add( "activeChannel" );
 		}
-		let section = document.querySelector( "#" + channels[channel].section );
+		let section = document.querySelector( "#" + channel.section );
 		let parent = section != null ? section : document.getElementById( "channels" );
 		parent.appendChild( t.content );
-	}
-}
-function makeItems( channel ) {
-	browser.runtime.sendMessage( { "getItems" : channel } ).then( items => {
-		removeChildren( "items" );
-		items.forEach( item => {
-			let t = document.importNode( document.getElementById( "itemTemplate" ) , true );
-			t.content.querySelector( "a" ).textContent = item.title;
-			t.content.querySelector( "a" ).href = item.link;
-			t.content.querySelector( "a" ).className = ( item.unread ) ? "unread" : "read";
-			t.content.querySelector( ".itemChannel" ).textContent = channel;
-			t.content.querySelector( ".itemDate" ).textContent = getDate( item.pubDate );
-			t.content.firstChild.title = item.title; // all children must not have title attribute.
-			t.content.querySelector( ".itemMarkRead" ).addEventListener( "click" , itemMarkAsRead );
-			document.querySelector( "#items" ).appendChild( t.content );
-		} );
 	} );
 }
 
@@ -159,7 +157,7 @@ function opmlImport( e ) {
 		let xmlDoc = parser.parseFromString( text , "text/xml" );
 		let outlines = xmlDoc.querySelectorAll( "outline[xmlUrl]" );
 		let channels = Array.from( outlines , v => {
-			return { "href" : v.getAttribute( "xmlUrl" ) , "channel" : v.getAttribute( "title" ) };
+			return { "href" : v.getAttribute( "xmlUrl" ) , "title" : v.getAttribute( "title" ) };
 		} );
 		browser.runtime.sendMessage( { "opmlImport" : channels } );
 	} );
@@ -176,12 +174,12 @@ function opmlExport() {
 		let parser = new DOMParser();
 		let xmlDoc = parser.parseFromString( opmlTemplate , "text/xml" );
 		let xmlBody = xmlDoc.querySelector( "body" );
-		for ( let channel in channels ) {
+		for ( let title in channels ) {
 			let outline = xmlDoc.createElement( "outline" );
-			outline.setAttribute( "text" , channel );
-			outline.setAttribute( "title" , channel );
+			outline.setAttribute( "text" , title );
+			outline.setAttribute( "title" , title );
 			outline.setAttribute( "type" , "rss" );
-			outline.setAttribute( "xmlUrl" , channels[channel].link );
+			outline.setAttribute( "xmlUrl" , channels[title].link );
 			xmlBody.appendChild( outline );
 			xmlBody.appendChild( xmlDoc.createTextNode( "\n" ) );
 		}

@@ -11,7 +11,7 @@ function parseXML( responseText ) {
 	if ( !rss && xmlDoc.querySelector( "feed" ) == null ) {
 		return false;
 	}
-	let channel = xmlDoc.querySelector( rss ? "channel>title" : "feed>title" ).textContent;
+	let title = xmlDoc.querySelector( rss ? "channel>title" : "feed>title" ).textContent;
 	let itemElems = xmlDoc.querySelectorAll( rss ? "item" : "entry" );
 	let items = Array.from( itemElems ).map( itemElem => {
 		let item = { "unread" : true };
@@ -28,7 +28,7 @@ function parseXML( responseText ) {
 		} );
 		return item;
 	} );
-	return { "channel" : channel , "newItems" : items };
+	return { "title" : title , "newItems" : items };
 }
 function get( url ) {
 	return new Promise( ( resolve , reject ) => {
@@ -40,40 +40,38 @@ function get( url ) {
 	} );
 }
 
-function setUnread( channel ) {
-	channels[channel].unread = channels[channel].items.filter( v => v.unread ).length;
-	setBadge();
-}
 
 function getTaggedChannels( tag ) {
 	return Object.values( channels ).filter( channel => channel.tags.includes( tag ) );
 }
-
 function setBadge() {
 	let taggedChannels = getTaggedChannels( "royalroad" );
 	let x = taggedChannels.reduce( ( acc , channel ) => acc + channel.unread , 0 );
 	browser.browserAction.setBadgeText( { "text" : x.toString() } );
 }
-
+function setUnread( channel ) {
+	channel.unread = channel.items.filter( v => v.unread ).length;
+	setBadge();
+}
 function addNewItems( channel , items ) {
-	let newItems = items.filter( item => channels[channel].items.every( v => v.title != item.title ) );
+	let newItems = items.filter( item => channel.items.every( v => v.title != item.title ) );
 	if ( newItems.length > 0 ) {
-		channels[channel].items.push( ...newItems );
-		channels[channel].items.sort( ( a , b ) => a.pubDate < b.pubDate );
-		channels[channel].unread = channels[channel].items.filter( v => v.unread ).length;
+		channel.items.push( ...newItems );
+		channel.items.sort( ( a , b ) => a.pubDate < b.pubDate );
+		channel.unread = channel.items.filter( v => v.unread ).length;
 		browser.storage.local.set( { "channels" : channels } );
 	}
 }
-function addChannelIfNew( href , channel ) {
-	if ( !( channel in channels ) ) {
+function addChannelIfNew( href , title ) {
+	if ( !( title in channels ) ) {
 		let host = hostsTags[new URL( href ).hostname];
-		channels[channel] = {
+		channels[title] = {
 			"items" : [] ,
 			"unread" : 0 ,
 			"link" : href ,
 			"tags" : [host] ,
 			"section" : host ,
-			"title" : channel ,
+			"title" : title ,
 			"updated" : Date.now() ,
 		};
 	}
@@ -82,7 +80,7 @@ function updateFeed( channel ) {
 	console.log( "updating feed: " + channel.title );
 	channel.updated = Date.now();
 	get( channel.link ).then( data => {
-		addNewItems( data.channel , data.newItems );
+		addNewItems( channels[data.title] , data.newItems );
 	} );
 }
 const getWait = lastUpdated => lastUpdated + timeBetweenUpdates - Date.now();
@@ -106,31 +104,32 @@ function updateFeeds( arr ) {
 	updateFeedsLoop();
 }
 function onMessage( message , sender , sendResponse ) {
+	let channel = channels[message.title];
 	if ( message.markAsRead ) {
-		let item = channels[message.channel].items.find( v => v.title == message.item );
+		let item = channel.items.find( v => v.title == message.item );
 		item.unread = !item.unread;
-		setUnread( message.channel );
+		setUnread( channel );
 		browser.storage.local.set( { "channels" : channels } );
 	}
 	if ( message.markAllRead ) {
-		channels[message.markAllRead].items.forEach( v => v.unread = false );
-		setUnread( message.markAllRead );
+		channel.items.forEach( v => v.unread = false );
+		setUnread( channel );
 		browser.storage.local.set( { "channels" : channels } );
 	}
 	if ( message.update ) {
-		updateFeed( channels[message.update] );
+		updateFeed( channel );
 	}
 	if ( message.updateAll ) {
 		updateFeeds( Object.values( channels ) );
 	}
 	if ( message.delete ) {
-		delete channels[message.delete];
+		delete channels[message.title];
 		browser.storage.local.set( { "channels" : channels } );
 	}
 	if ( message.opmlImport ) {
-		message.opmlImport.forEach( v => addChannelIfNew( v.href , v.channel ) );
+		message.opmlImport.forEach( v => addChannelIfNew( v.href , v.title ) );
 		browser.storage.local.set( { "channels" : channels } );
-		updateFeeds( message.opmlImport.map( v => channels[v.channel] ) );
+		updateFeeds( message.opmlImport.map( v => channels[v.title] ) );
 	}
 	if ( message.jsonImport ) {
 		Object.assign( channels , message.jsonImport );
@@ -138,15 +137,15 @@ function onMessage( message , sender , sendResponse ) {
 		updateFeeds( Object.values( message.jsonImport ) );
 	}
 	if ( message.getItems ) {
-		sendResponse( channels[message.getItems].items );
+		sendResponse( channel.items );
 	}
 	if ( message.getChannels ) {
 		sendResponse( channels );
 	}
 	if ( message.newChannelURL ) {
 		return get( message.newChannelURL ).then( data => {
-			addChannelIfNew( message.newChannelURL , data.channel );
-			addNewItems( data.channel , data.newItems );
+			addChannelIfNew( message.newChannelURL , data.title );
+			addNewItems( channels[data.title] , data.newItems );
 		} , r => "error" );
 	}
 }

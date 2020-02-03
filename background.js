@@ -42,22 +42,16 @@ function get( url ) {
 
 function setUnread( channel ) {
 	channels[channel].unread = channels[channel].items.filter( v => v.unread ).length;
+	setBadge();
 }
 
 function getTaggedChannels( tag ) {
-	// return Object.keys( channels ).filter( channel => channels[channel].tags.includes( tag ) );
-	// const tagsFunc = v => ( typeof( tags ) == "string" ) ? v == tags : tags.includes( v );
-	// const filterFunc = channel => channels[channel].tags.some( tagsFunc );
-	// const filterFunc = channel => channels[channel].tags.some( v => tags.includes( v ) );
-	// return Object.keys( channels ).filter( filterFunc ); // if args is tags array instead of tag string.
-
-	// tempory solution that checks url rather than tags.
-	return Object.keys( channels ).filter( channel => channels[channel].tags.includes( tag ) );
+	return Object.values( channels ).filter( channel => channel.tags.includes( tag ) );
 }
 
 function setBadge() {
 	let taggedChannels = getTaggedChannels( "royalroad" );
-	let x = taggedChannels.reduce( ( acc , channel ) => acc + channels[channel].unread , 0 );
+	let x = taggedChannels.reduce( ( acc , channel ) => acc + channel.unread , 0 );
 	browser.browserAction.setBadgeText( { "text" : x.toString() } );
 }
 

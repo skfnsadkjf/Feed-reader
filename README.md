@@ -12,6 +12,9 @@ Current Features:
 
 TODO
 
+* fix potential bug where adding a feed without a predefined tag will error.
+  * in content_page.js -> makeChannels() -> appendChild( t.content );
+
 * rejigger data
 
 * content script that detects if a page has a feed.

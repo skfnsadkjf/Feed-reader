@@ -67,8 +67,8 @@ function showCustomContextMenu( e ) {
 	document.getElementById( "contextMenu" ).style.top = e.clientY + "px";
 }
 function makeChannelSections( channels ) {
-	let x = Object.keys( channels ).map( channel => channels[channel].section );
-	let sections = Array.from( new Set( x ) ); // removes all duplicates
+	let x = Object.values( channels ).map( channel => channel.section );
+	let sections = x.filter( ( v , i , arr ) => v && arr.indexOf( v ) == i ).sort();
 	sections.forEach( section => {
 		let t = document.importNode( document.getElementById( "channelSectionTemplate" ) , true );
 		t.content.querySelector( ".channelSection:first-child" ).textContent = section;
@@ -93,7 +93,9 @@ function makeChannels( channels ) {
 		if ( channel == activeChannel )  {
 			t.content.firstChild.classList.add( "activeChannel" );
 		}
-		document.querySelector( "#" + channels[channel].section ).appendChild( t.content );
+		let section = document.querySelector( "#" + channels[channel].section );
+		let parent = section != null ? section : document.getElementById( "channels" );
+		parent.appendChild( t.content );
 	}
 }
 function makeItems( channel ) {
@@ -120,6 +122,7 @@ function onStorageChanged( changes , areaName ) {
 }
 
 // https://www.royalroad.com/fiction/syndication/16946
+// https://www.youtube.com/feeds/videos.xml?channel_id=UCrTNhL_yO3tPTdQ5XgmmWjA
 // https://validator.w3.org/feed/docs/rss2.html
 // http://frogs.dongs
 // dongs

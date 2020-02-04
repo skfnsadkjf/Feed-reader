@@ -12,6 +12,8 @@ Current Features:
 
 TODO
 
+* maybe add "*" to badge if there are non-tracked unread entries.
+
 * content script that detects if a page has a feed.
 * add manga
   * Not sure how manga would fit into the page without mad scrolling becoming a thing.

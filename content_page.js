@@ -74,45 +74,34 @@ function showCustomContextMenu( e ) {
 	document.getElementById( "contextMenu" ).style.top = e.clientY + "px";
 	setActiveChannel( e );
 }
-// function makeChannelSections( channels ) {
-// 	let x = Object.values( channels ).map( channel => channel.section );
-// 	let sections = x.filter( ( v , i , arr ) => v && arr.indexOf( v ) == i ).sort();
-// 	sections.forEach( section => {
-// 		let t = document.importNode( document.getElementById( "channelSectionTemplate" ) , true );
-// 		t.content.querySelector( ".channelSection:first-child" ).textContent = section;
-// 		t.content.querySelector( "div" ).id = section;
-// 		document.querySelector( "#channels" ).appendChild( t.content );
-// 	} );
-// }
 function makeChannels( channels ) {
 	document.querySelectorAll( ".channel" ).forEach( v => v.remove() );
-	// makeChannelSections( channels );
-	let channelsArray = Object.values( channels ).sort( ( a , b ) => a.title > b.title )
+	let channelsArray = Object.values( channels ).sort( ( a , b ) => a.title > b.title );
 	channelsArray.forEach( channel => {
-		let t = document.importNode( document.getElementById( "channelTemplate" ) , true );
-		t.content.querySelector( ".title" ).textContent = channel.title;
+		let t = document.importNode( document.getElementById( "channelTemplate" ) , true ).content;
 		let url = new URL( channel.link );
-		let icon = "https://icons.duckduckgo.com/ip3/" + url.hostname + ".ico"
-		t.content.querySelector( "img" ).src = icon;
-		let unreadCount = channel.items.filter( v => v.unread ).length;
-		t.content.querySelector( ".title" ).style["font-weight"] = unreadCount > 0 ? "bold" : "";
-		t.content.querySelector( ".unread" ).textContent = unreadCount > 0 ? unreadCount : "";
-		t.content.firstChild.title = channel.title; // all children must not have title attribute.
-		t.content.firstChild.addEventListener( "click" , setActiveChannel );
-		t.content.firstChild.addEventListener( "contextmenu" , showCustomContextMenu );
-		if ( channel.title == activeChannel )  {
-			t.content.firstChild.classList.add( "activeChannel" );
-		}
+		let icon = "https://icons.duckduckgo.com/ip3/" + url.hostname + ".ico";
 		let section = document.querySelector( "#" + channel.section );
 		let parent = section != null ? section : document.getElementById( "noSection" );
-		parent.appendChild( t.content );
+		t.querySelector( ".title" ).textContent = channel.title;
+		t.querySelector( "img" ).src = icon;
+		t.querySelector( ".unread" ).textContent = channel.unread;
+		t.firstChild.title = channel.title; // all children must not have title attribute.
+		t.firstChild.addEventListener( "click" , setActiveChannel );
+		t.firstChild.addEventListener( "contextmenu" , showCustomContextMenu );
+		if ( channel.unread == 0 ) {
+			t.firstChild.classList.add( "noUnread" );
+		}
+		if ( channel.title == activeChannel )  {
+			t.firstChild.classList.add( "activeChannel" );
+		}
+		parent.appendChild( t );
 	} );
 }
 
 
 
-function onStorageChanged( changes , areaName ) {
-	// makeChannels( changes.channels.newValue );
+function onStorageChanged( changes ) {
 	browser.runtime.sendMessage( { "getChannels" : true } ).then( v => makeChannels( v ) );
 }
 
@@ -133,7 +122,6 @@ function loadNewChannel( e ) {
 	if ( !url.match( /.:/ ) ) { // Valid URLs only require a single colon proceeded by at least 1 character.
 		return loadChannelStatus( "Field requires a URL" );
 	}
-	console.log( url );
 	browser.runtime.sendMessage( { "newChannelURL" : url } ).then( error => {
 		loadChannelStatus( error ? "Failed to load URL." : "Success!" );
 	} );

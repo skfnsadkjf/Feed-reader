@@ -39,12 +39,19 @@ body{
 	overflow-x: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+	font-size: 13px;
+}
+.channel.noUnread{
+	color: #777777;
+}
+.channel.noUnread .unread{
+	display: none;
 }
 .channel .unread{
 	float: right;
 }
 .channel>img{
-	height: 16px;
+	height: 14px;
 	margin-right: 5px;
 	vertical-align: middle;
 }

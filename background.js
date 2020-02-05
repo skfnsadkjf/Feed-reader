@@ -1,7 +1,7 @@
 'use strict';
 
-const timeBetweenUpdates = 86400000; // 86400000; 1 day.
-const minimumTimeBetweenUpdates = 2000;
+const timeBetweenUpdates = 21600000; // 86400000; 1 day.
+const minimumTimeBetweenUpdates = 4000;
 const hostsTags = { "www.royalroad.com" : "royalroad" , "www.youtube.com" : "youtube" };
 
 function parseXML( responseText ) {
@@ -80,8 +80,10 @@ function addChannelIfNew( href , title ) {
 function updateFeed( channel ) {
 	console.log( "updating feed: " + channel.title );
 	channel.updated = Date.now();
+	browser.storage.local.set( { [channel.title] : channel } );
 	get( channel.link ).then( data => {
 		addNewItems( channels[data.title] , data.newItems );
+		setBadge();
 	} );
 }
 const getWait = lastUpdated => lastUpdated + timeBetweenUpdates - Date.now();

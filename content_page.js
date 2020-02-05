@@ -43,20 +43,18 @@ function channelDelete( e ) {
 		browser.runtime.sendMessage( { "delete" : true , "title" : title } );
 	}
 }
-function makeItems( title ) {
-	browser.runtime.sendMessage( { "getItems" : true , "title" : title } ).then( items => {
-		document.querySelectorAll( ".item" ).forEach( v => v.remove() );
-		items.forEach( item => {
-			let t = document.importNode( document.getElementById( "itemTemplate" ) , true );
-			t.content.querySelector( "a" ).textContent = item.title;
-			t.content.querySelector( "a" ).href = item.link;
-			t.content.querySelector( "a" ).className = ( item.unread ) ? "unread" : "read";
-			t.content.querySelector( ".itemChannel" ).textContent = title;
-			t.content.querySelector( ".itemDate" ).textContent = getDate( item.pubDate );
-			t.content.firstChild.title = item.title; // all children must not have title attribute.
-			t.content.querySelector( ".itemMarkRead" ).addEventListener( "click" , itemMarkAsRead );
-			document.querySelector( "#items" ).appendChild( t.content );
-		} );
+function makeItems( items ) {
+	document.querySelectorAll( ".item" ).forEach( v => v.remove() );
+	items.forEach( item => {
+		let t = document.importNode( document.getElementById( "itemTemplate" ) , true );
+		t.content.querySelector( "a" ).textContent = item.title;
+		t.content.querySelector( "a" ).href = item.link;
+		t.content.querySelector( "a" ).className = ( item.unread ) ? "unread" : "read";
+		t.content.querySelector( ".itemChannel" ).textContent = activeChannel;
+		t.content.querySelector( ".itemDate" ).textContent = getDate( item.pubDate );
+		t.content.firstChild.title = item.title; // all children must not have title attribute.
+		t.content.querySelector( ".itemMarkRead" ).addEventListener( "click" , itemMarkAsRead );
+		document.querySelector( "#items" ).appendChild( t.content );
 	} );
 }
 function setActiveChannel( e ) {
@@ -66,7 +64,8 @@ function setActiveChannel( e ) {
 	let channel = getChannel( e.target );
 	channel.classList.add( "activeChannel" );
 	activeChannel = channel.title;
-	makeItems( activeChannel );
+	let message = { "getItems" : true , "title" : activeChannel };
+	browser.runtime.sendMessage( message ).then( items => makeItems( items ) );
 }
 function showCustomContextMenu( e ) {
 	e.preventDefault();
@@ -103,6 +102,11 @@ function makeChannels( channels ) {
 
 
 function onStorageChanged( changes ) {
+	Object.values( changes ).forEach( v => {
+		if ( v.newValue.title == activeChannel && v.newValue.items.length != v.oldValue.items.length ) {
+			makeItems( v.newValue.items );
+		}
+	} );
 	browser.runtime.sendMessage( { "getChannels" : true } ).then( v => makeChannels( v ) );
 }
 

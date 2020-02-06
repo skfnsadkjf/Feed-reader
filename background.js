@@ -166,6 +166,7 @@ browser.runtime.onMessage.addListener( onMessage );
 browser.browserAction.onClicked.addListener( browserActionOnClicked );
 browser.storage.local.get( null ).then( v => {
 	channels = v != undefined ? v : {};
+	browser.browserAction.setBadgeBackgroundColor( { "color" : "#2222ff" } );
 	setBadge();
 	updateFeedsLoop();
 } );

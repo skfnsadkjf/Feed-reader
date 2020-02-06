@@ -86,21 +86,15 @@ function updateFeed( channel ) {
 		setBadge();
 	} );
 }
-const getWait = lastUpdated => lastUpdated + timeBetweenUpdates - Date.now();
-const setTimer = wait => timer = setTimeout( updateFeedsLoop , wait );
 function updateFeedsLoop() {
 	clearTimeout( timer );
-	let arr = Object.values( channels ).sort( ( a , b ) => a.updated > b.updated );
-	if ( arr.length == 0 ) { // if there are no feeds, do nothing and check again every minute.
-		return setTimer( 10000 );
+	let arr = Object.values( channels );
+	let next = arr.reduce( ( acc , v ) => v.updated < acc.updated ? v : acc , { "updated" : Infinity } );
+	let wait = next.updated + timeBetweenUpdates - Date.now();
+	if ( wait < 0 ) {
+		updateFeed( next );
 	}
-	let timeUntilUpdateFeeds = getWait( arr[0].updated ); // when positive, updateFeedsLoop() was called too early.
-	if ( timeUntilUpdateFeeds > 0 ) {
-		return setTimer( timeUntilUpdateFeeds );
-	}
-	updateFeed( arr[0] );
-	let wait = getWait( arr.length == 1 ? arr[0].updated : arr[1].updated ); // assumes all feeds update at same rate.
-	return setTimer( Math.max( minimumTimeBetweenUpdates , wait ) );
+	timer = setTimeout( updateFeedsLoop , Math.max( minimumTimeBetweenUpdates , wait ) );
 }
 function updateFeeds( arr ) {
 	arr.forEach( v => v.updated = 0 );
@@ -148,6 +142,7 @@ function onMessage( message , sender , sendResponse ) {
 		return get( message.newChannelURL ).then( data => {
 			addChannelIfNew( message.newChannelURL , data.title );
 			addNewItems( channels[data.title] , data.newItems );
+			updateFeedsLoop();
 		} , r => "error" );
 	}
 }

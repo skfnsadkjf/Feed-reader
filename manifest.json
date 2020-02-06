@@ -14,7 +14,7 @@
 		"storage"
 	],
 	"browser_action": {
-		"default_icon": "icons/browser-action.png",
+		"default_icon": "icons/feedReaderFavicon.png",
 		"default_title": "grim"
 	},
 	"background": {

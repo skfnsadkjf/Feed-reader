@@ -31,7 +31,7 @@ function itemMarkAsRead( e ) {
 	browser.runtime.sendMessage( { "markAsRead" : true , "title" : activeChannel , "item" : item.title } );
 }
 function channelMarkAllRead( e ) {
-	document.querySelectorAll( ".item a" ).classList.remove( "unread" );
+	document.querySelectorAll( ".item a" ).forEach( v => v.classList.remove( "unread" ) );
 	browser.runtime.sendMessage( { "markAllRead" : true , "title" : activeChannel } );
 }
 function channelDelete( e ) {

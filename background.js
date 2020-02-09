@@ -47,7 +47,8 @@ function getTaggedChannels( tag ) {
 function setBadge() {
 	let taggedChannels = getTaggedChannels( "royalroad" );
 	let x = taggedChannels.reduce( ( acc , channel ) => acc + channel.unread , 0 );
-	browser.browserAction.setBadgeText( { "text" : x.toString() } );
+	let str = x != 0 ? x.toString() : "";
+	browser.browserAction.setBadgeText( { "text" : str } );
 }
 function setUnread( channel ) {
 	channel.unread = channel.items.filter( v => v.unread ).length;
